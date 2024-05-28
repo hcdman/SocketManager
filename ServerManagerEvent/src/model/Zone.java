@@ -6,4 +6,5 @@ public class Zone {
 	private String zoneId;
     private String name;
     private List<Seat> seats;
+    private String test;
 }
