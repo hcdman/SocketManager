@@ -20,6 +20,7 @@ import utils.EventReader;
 import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +90,7 @@ public class HomeView extends JFrame {
 		// Disable table's editing mode
 		table.setDefaultEditor(Object.class, null);
 		// set column name of table
-		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "STT", "Name event", "Discription","Date" }));
+		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "STT", "Name event", "Description","Date" }));
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 		for (int i = 0; i < table.getColumnCount(); i++) {
@@ -100,6 +101,7 @@ public class HomeView extends JFrame {
 		contentPane.add(scrollPane);
 		// Actions
 		ActionListener action = new ManageEventController(this);
+		table.addMouseListener((MouseListener) action);
 		btnAddNewEvent.addActionListener(action);
 	}
 	public void showEvents() {

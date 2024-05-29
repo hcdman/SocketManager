@@ -86,7 +86,7 @@ public class AddEventView extends JFrame {
 		lblNameLabel.setBounds(299, 89, 67, 13);
 		contentPane.add(lblNameLabel);
 
-		lblDiscription = new JLabel("Discription");
+		lblDiscription = new JLabel("Description");
 		lblDiscription.setBounds(306, 139, 60, 13);
 		contentPane.add(lblDiscription);
 
