@@ -14,6 +14,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.toedter.calendar.JDateChooser;
 
 import controller.ManageEventController;
+import model.Event;
 import model.Schedule;
 import model.Zone;
 
@@ -35,23 +37,29 @@ public class AddEventView extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTextField textField;
+	public JTextField nameEvent;
 	private JLabel lblNameLabel;
 	private JLabel lblDiscription;
-	private JTextField textField_1;
+	public JTextField Discription;
 	private JLabel lblDate;
 	public JTable table;
 	public JTable tableSeat;
-	private JTextField nameZone;
-	private JTextField price;
-	private JTextField rows;
-	private JTextField seats;
+	public JTextField nameZone;
+	public JTextField price;
+	public JTextField rows;
+	public JDateChooser dateEvent;
+	public JTextField seats;
+	public TimePicker startTime;
+	public TimePicker endTime;
+	public JComboBox<String> comboBox;
+	public List<Event> events;
 	public List<Schedule> schedules;
 	public List<Zone> zones;
 
 	public AddEventView() {
 		schedules = new ArrayList<>();
 		zones = new ArrayList<>();
+		events = new ArrayList<>();
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setBounds(200, 200, 1008, 773);
 		contentPane = new JPanel();
@@ -69,10 +77,10 @@ public class AddEventView extends JFrame {
 		btnSaveEvent.setBounds(824, 681, 121, 21);
 		contentPane.add(btnSaveEvent);
 
-		textField = new JTextField();
-		textField.setBounds(386, 86, 187, 30);
-		contentPane.add(textField);
-		textField.setColumns(10);
+		nameEvent = new JTextField();
+		nameEvent.setBounds(386, 86, 187, 30);
+		contentPane.add(nameEvent);
+		nameEvent.setColumns(10);
 
 		lblNameLabel = new JLabel("Name event");
 		lblNameLabel.setBounds(299, 89, 67, 13);
@@ -82,18 +90,19 @@ public class AddEventView extends JFrame {
 		lblDiscription.setBounds(306, 139, 60, 13);
 		contentPane.add(lblDiscription);
 
-		textField_1 = new JTextField();
-		textField_1.setColumns(10);
-		textField_1.setBounds(386, 125, 187, 42);
-		contentPane.add(textField_1);
+		Discription = new JTextField();
+		Discription.setColumns(10);
+		Discription.setBounds(386, 125, 187, 42);
+		contentPane.add(Discription);
 
 		lblDate = new JLabel("Date");
 		lblDate.setBounds(306, 183, 60, 13);
 		contentPane.add(lblDate);
-
-		JDateChooser dateChooser = new JDateChooser();
-		dateChooser.setBounds(386, 177, 187, 30);
-		contentPane.add(dateChooser);
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		dateEvent = new JDateChooser();
+		dateEvent.setBounds(386, 177, 187, 30);
+		dateEvent.setDateFormatString(dateFormat.toPattern());
+		contentPane.add(dateEvent);
 		// Schedule
 		table = new JTable();
 		table.setFont(new Font("Tahoma", Font.PLAIN, 11));
@@ -110,12 +119,13 @@ public class AddEventView extends JFrame {
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setBounds(25, 266, 353, 257);
 		contentPane.add(scrollPane);
+
 		// Create a TimePickerSettings instance to customize the TimePicker.
 		TimePickerSettings timeSettings = new TimePickerSettings();
 		// Optionally set the display format.
 		timeSettings.use24HourClockFormat();
 		// Create the TimePicker with the settings.
-		TimePicker startTime = new TimePicker(timeSettings);
+		startTime = new TimePicker(timeSettings);
 		// Set an initial time if desired.
 		startTime.setTime(LocalTime.now());
 		// Set bounds for the TimePicker and add it to the content pane
@@ -126,7 +136,7 @@ public class AddEventView extends JFrame {
 		lblStart.setBounds(54, 553, 63, 13);
 		contentPane.add(lblStart);
 
-		TimePicker endTime = new TimePicker((TimePickerSettings) null);
+		endTime = new TimePicker(timeSettings);
 		endTime.setBounds(124, 591, 120, 30);
 		endTime.setTime(LocalTime.now());
 		contentPane.add(endTime);
@@ -150,7 +160,7 @@ public class AddEventView extends JFrame {
 				new String[] { "STT", "Name zone", "Price ticket", "Number rows", "Seats per row" }));
 		DefaultTableCellRenderer centerRenderer_2 = new DefaultTableCellRenderer();
 		centerRenderer_2.setHorizontalAlignment(JLabel.CENTER);
-		for (int i = 0; i < table.getColumnCount(); i++) {
+		for (int i = 0; i < tableSeat.getColumnCount(); i++) {
 			tableSeat.getColumnModel().getColumn(i).setHeaderRenderer(centerRenderer_2);
 		}
 		JScrollPane scrollPane_2 = new JScrollPane(tableSeat);
@@ -158,11 +168,8 @@ public class AddEventView extends JFrame {
 		contentPane.add(scrollPane_2);
 
 		JButton btnAddZone = new JButton("Add zone");
-		btnAddZone.setBounds(113, 447, 122, 21);
+		btnAddZone.setBounds(598, 692, 122, 21);
 		contentPane.add(btnAddZone);
-		JButton btnSave = new JButton("Add zone");
-		btnSave.setBounds(598, 692, 122, 21);
-		contentPane.add(btnSave);
 
 		JLabel lblZone = new JLabel("Name zone");
 		lblZone.setBounds(480, 545, 67, 20);
@@ -200,12 +207,15 @@ public class AddEventView extends JFrame {
 		seats.setBounds(558, 652, 187, 30);
 		contentPane.add(seats);
 
-		JComboBox comboBox = new JComboBox();
+		comboBox = new JComboBox<String>();
 		comboBox.setBounds(853, 235, 111, 21);
 		contentPane.add(comboBox);
 		// action
 		ActionListener action = new ManageEventController(this);
 		btnAddSchedule.addActionListener(action);
+		btnAddZone.addActionListener(action);
+		btnSaveEvent.addActionListener(action);
+		comboBox.addActionListener(action);
 	}
 
 	public void updateDataSchedule() {
@@ -222,9 +232,47 @@ public class AddEventView extends JFrame {
 		for (int i = 0; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 		}
-		for(int i=0;i<this.schedules.size();i++)
-		{
-			model.addRow(new Object[] { i+1,this.schedules.get(i).getStartTime(), this.schedules.get(i).getEndTime()});
-		}		
+		for (int i = 0; i < this.schedules.size(); i++) {
+			model.addRow(
+					new Object[] { i + 1, this.schedules.get(i).getStartTime(), this.schedules.get(i).getEndTime() });
+		}
+		this.comboBox.removeAllItems();
+		for (Schedule schedule : this.schedules) {
+			this.comboBox.addItem(schedule.getStartTime() + " - " + schedule.getEndTime());
+		}
+	}
+
+	public void updateDataZone() {
+		// clear old data and insert again
+		DefaultTableModel model = (DefaultTableModel) tableSeat.getModel();
+		int rowCount = model.getRowCount();
+		// Remove rows one by one from the end of the table
+		for (int i = rowCount - 1; i >= 0; i--) {
+			model.removeRow(i);
+		}
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
+		// Set renderer for all columns
+		for (int i = 0; i < tableSeat.getColumnCount(); i++) {
+			tableSeat.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+		}
+		if (this.zones != null) {
+			for (int i = 0; i < zones.size(); i++) {
+				model.addRow(new Object[] { i + 1, zones.get(i).getName(), zones.get(i).getTicketPrice(),
+						zones.get(i).getRows(), zones.get(i).getColumn() });
+			}
+		}
+	}
+	public void makeEmptyScheduleForm()
+	{
+		this.startTime.clear();
+		this.endTime.clear();
+	}
+	public void makeEmptyZoneForm()
+	{
+		this.nameZone.setText("");
+		this.price.setText("");
+		this.rows.setText("");
+		this.seats.setText("");
 	}
 }

@@ -9,6 +9,10 @@ public class Schedule {
     private LocalTime startTime;
     private LocalTime endTime;
     private List<Zone> zones;
+    public Schedule()
+    {
+    	
+    }
 	public Schedule(String scheduleId, LocalTime startTime, LocalTime endTime, List<Zone> zones) {
 		super();
 		this.scheduleId = scheduleId;

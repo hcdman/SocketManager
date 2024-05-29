@@ -8,5 +8,9 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/jcalendar-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/LGoodDatePicker-11.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-annotations-2.12.5.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-core-2.12.5.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-databind-2.12.5.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-datatype-jsr310-2.12.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,0 +1,1 @@
+[{"eventId":"E0","name":"doraemon","description":"nothing","date":"2024-05-09","schedules":[{"scheduleId":"SCH0","startTime":"00:00:00","endTime":"10:36:00","zones":[{"zoneId":"Z0","name":"A","ticketPrice":10000.0,"rows":10,"column":10,"seats":[]},{"zoneId":"Z1","name":"B","ticketPrice":20000.0,"rows":12,"column":12,"seats":[]}]}]}]
