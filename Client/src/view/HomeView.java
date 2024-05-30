@@ -1,5 +1,9 @@
 package view;
 import java.awt.Font;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +17,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import controller.ClientController;
 import model.Event;
 
 public class HomeView extends JFrame {
@@ -21,7 +26,7 @@ public class HomeView extends JFrame {
 	private JPanel contentPane;
 	public JTable table;
 	public List<Event> events;
-	public HomeView() {
+	public HomeView(ObjectInputStream in, ObjectOutputStream out) {
 		this.events = new ArrayList<>();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		contentPane = new JPanel();
@@ -53,6 +58,9 @@ public class HomeView extends JFrame {
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setBounds(104, 122, 658, 325);
 		contentPane.add(scrollPane);
+		//Action
+		ActionListener action = new ClientController(this,in,out);
+		table.addMouseListener((MouseListener) action);
 	}
 	
 	public void showEvents() {
