@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -149,7 +150,6 @@ public class ServerManageView extends JFrame {
 
 	public void startSocket() throws IOException {
 		server = null;
-		loadEventData();
 		try {
 			InetAddress localHost = InetAddress.getLocalHost();
 			server = new ServerSocket(3000, 50, localHost);
@@ -157,13 +157,11 @@ public class ServerManageView extends JFrame {
 			this.Port.setText(3000 + "");
 			while (true) {
 				Socket socket = server.accept();
-				ClientHandler clientThread = new ClientHandler(socket);
+				ClientHandler clientThread = new ClientHandler(socket,this);
 				clients.add(clientThread);
+				this.UpdateClientConnect();
 				pool.execute(clientThread);
-				String IP = socket.getInetAddress().toString();
-				String Port = socket.getPort() + "";
-				this.addClientConnect(IP, Port, "Connected");
-				//handleClient(socket);
+
 			}
 		} catch (IOException ex) {
 			System.out.println(ex);
@@ -184,34 +182,34 @@ public class ServerManageView extends JFrame {
 		}
 	}
 
-	public void loadEventData() {
-		try {
-			this.events = EventReader.readEventsFromFile("src/data/events.json");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void handleClient(Socket clientSocket) {
-		try (ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream())) {
-			out.writeObject(this.events);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	// add row connect client
-	public void addClientConnect(String ip, String port, String status) {
+	public void UpdateClientConnect() {
+		// clear old data and insert again
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		int rowCount = model.getRowCount();
-
+		// Remove rows one by one from the end of the table
+		for (int i = rowCount - 1; i >= 0; i--) {
+			model.removeRow(i);
+		}
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
 		// Set renderer for all columns
 		for (int i = 0; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 		}
-		model.addRow(new Object[] { ip, port, status });
+		for (int i = 0; i < this.clients.size(); i++) {
+			model.addRow(new Object[] {this.clients.get(i).getClient().getInetAddress().toString(),this.clients.get(i).getClient().getPort()+"","Connected" });
+		}
+	}
+	public void RemoveClient(int port)
+	{
+		Iterator<ClientHandler> iterator = clients.iterator();
+        while (iterator.hasNext()) {
+            ClientHandler value = iterator.next();
+            if (value.getClient().getPort() == port) {
+                iterator.remove();
+            }
+        }
 	}
 
 }

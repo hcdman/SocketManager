@@ -135,6 +135,11 @@ public class ManageEventController implements ActionListener, MouseListener {
 				public void windowClosed(WindowEvent e) {
 					view.setEnabled(true);
 					view.setVisible(true);
+					try {
+						EventWriter.writeEventsToFile(view.events, "src/data/events.json");
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
 					view.showEvents();
 					server.endSocket();
 				}
