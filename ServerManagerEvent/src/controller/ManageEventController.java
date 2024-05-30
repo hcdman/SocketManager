@@ -27,12 +27,14 @@ import utils.EventWriter;
 import view.AddEventView;
 import view.DetailEventView;
 import view.HomeView;
+import view.ServerManageView;
 
 public class ManageEventController implements ActionListener, MouseListener {
 
 	private HomeView view;
 	private AddEventView addEventView;
 	private DetailEventView detailView;
+	private ServerManageView server;
 
 	public ManageEventController(HomeView homeView) {
 		this.view = homeView;
@@ -44,6 +46,9 @@ public class ManageEventController implements ActionListener, MouseListener {
 
 	public ManageEventController(DetailEventView view) {
 		this.detailView = view;
+	}
+	public ManageEventController(ServerManageView view) {
+		this.server = view;
 	}
 
 	@Override
@@ -118,6 +123,22 @@ public class ManageEventController implements ActionListener, MouseListener {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
+		}
+		if (command.equals("Open server")) {
+			this.server = new ServerManageView();
+			this.view.setEnabled(false);
+			this.server.setLocationRelativeTo(null);
+			this.server.setVisible(true);
+			this.server.initServer();
+			this.server.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosed(WindowEvent e) {
+					view.setEnabled(true);
+					view.setVisible(true);
+					view.showEvents();
+					server.endSocket();
+				}
+			});
 		}
 
 	}

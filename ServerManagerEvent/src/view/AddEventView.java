@@ -123,7 +123,7 @@ public class AddEventView extends JFrame {
 		// Create a TimePickerSettings instance to customize the TimePicker.
 		TimePickerSettings timeSettings = new TimePickerSettings();
 		// Optionally set the display format.
-		timeSettings.use24HourClockFormat();
+		timeSettings.use24HourClockFormat();	
 		// Create the TimePicker with the settings.
 		startTime = new TimePicker(timeSettings);
 		// Set an initial time if desired.

@@ -99,10 +99,15 @@ public class HomeView extends JFrame {
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setBounds(104, 122, 658, 325);
 		contentPane.add(scrollPane);
+		
+		JButton btnOpenServer = new JButton("Open server");
+		btnOpenServer.setBounds(104, 91, 121, 21);
+		contentPane.add(btnOpenServer);
 		// Actions
 		ActionListener action = new ManageEventController(this);
 		table.addMouseListener((MouseListener) action);
 		btnAddNewEvent.addActionListener(action);
+		btnOpenServer.addActionListener(action);
 	}
 	public void showEvents() {
 		// clear old data and insert again

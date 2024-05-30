@@ -1,8 +1,10 @@
 package model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Zone {
+public class Zone implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private String zoneId;
     private String name;
     private double ticketPrice;
