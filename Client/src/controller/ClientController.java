@@ -87,7 +87,7 @@ public class ClientController implements ActionListener, MouseListener {
 			// get port and address to connect
 			try {
 				int indexSchedule = this.detail.comboBox.getSelectedIndex();
-				String msg = MessageClient.BOOK + " " + this.detail.event.getEventId() + " " + indexSchedule;
+				String msg = MessageClient.BOOK + " "+ this.detail.booking.size()+" " + this.detail.event.getEventId() + " " + indexSchedule;
 
 				for (Booked value : this.detail.booking) {
 					msg += " " + value.getZoneId() + " " + value.getSeatId();
