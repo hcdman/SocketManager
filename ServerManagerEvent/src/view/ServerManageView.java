@@ -28,6 +28,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.lgooddatepicker.components.TimePickerSettings;
@@ -35,6 +36,7 @@ import com.github.lgooddatepicker.components.TimePickerSettings;
 import controller.ManageEventController;
 import model.ClientHandler;
 import model.Event;
+import model.History;
 import utils.EventReader;
 
 public class ServerManageView extends JFrame {
@@ -47,9 +49,11 @@ public class ServerManageView extends JFrame {
 	public JTextField Port;
 	public ServerSocket server;
 	public JTable table;
+	private boolean running;
 	public JTable tableClient;
 	public List<Event> events;
 	private final ArrayList<ClientHandler> clients = new ArrayList<>();
+	public ArrayList<History> histories = new ArrayList<>();
 	private final ExecutorService pool = Executors.newFixedThreadPool(4);
 
 	public ServerManageView() {
@@ -101,12 +105,6 @@ public class ServerManageView extends JFrame {
 		scrollPane.setBounds(37, 208, 353, 257);
 		contentPane.add(scrollPane);
 
-		// Create a TimePickerSettings instance to customize the TimePicker.
-		TimePickerSettings timeSettings = new TimePickerSettings();
-		// Optionally set the display format.
-		timeSettings.use24HourClockFormat();
-
-		// Zone for seating
 		tableClient = new JTable();
 		tableClient.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		tableClient.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
@@ -116,10 +114,17 @@ public class ServerManageView extends JFrame {
 		tableClient.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "IP", "Port", "Time", "Action" }));
 		DefaultTableCellRenderer centerRenderer_2 = new DefaultTableCellRenderer();
 		centerRenderer_2.setHorizontalAlignment(JLabel.CENTER);
+		
 		for (int i = 0; i < tableClient.getColumnCount(); i++) {
 			tableClient.getColumnModel().getColumn(i).setHeaderRenderer(centerRenderer_2);
 		}
+		TableColumnModel columnModel = tableClient.getColumnModel();
+		columnModel.getColumn(0).setPreferredWidth(100); // Width for "IP" column
+		columnModel.getColumn(1).setPreferredWidth(50);  // Width for "Port" column
+		columnModel.getColumn(2).setPreferredWidth(150); // Width for "Time" column
+		columnModel.getColumn(3).setPreferredWidth(200); // Width for "Action" column
 		JScrollPane scrollPane_2 = new JScrollPane(tableClient);
+		//tableClient.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		scrollPane_2.setBounds(436, 208, 528, 257);
 		contentPane.add(scrollPane_2);
 
@@ -155,31 +160,46 @@ public class ServerManageView extends JFrame {
 			server = new ServerSocket(3000, 50, localHost);
 			nameIP.setText(localHost.getHostAddress());
 			this.Port.setText(3000 + "");
-			while (true) {
-				Socket socket = server.accept();
-				ClientHandler clientThread = new ClientHandler(socket,this);
-				clients.add(clientThread);
-				this.UpdateClientConnect();
-				pool.execute(clientThread);
-
+			running=true;
+			while (running) {
+				
+				try {
+					Socket socket = server.accept();
+					ClientHandler clientThread = new ClientHandler(socket,this);
+					clients.add(clientThread);
+					this.UpdateClientConnect();
+					pool.execute(clientThread);
+				} catch (Exception e) {
+					 if (!running) {
+                        // Server was stopped, exit loop
+                        break;
+                    }
+					e.printStackTrace();
+				}
 			}
 		} catch (IOException ex) {
 			System.out.println(ex);
 		} finally {
-			if (server != null) {
-				server.close();
-			}
+			if (server != null && !server.isClosed()) {
+                server.close();
+            }
+            pool.shutdown(); // Properly shut down the thread pool
+            for (ClientHandler client : clients) {
+                client.getClient().close(); // Ensure all client handlers are closed
+            }
 		}
 	}
 
 	public void endSocket() {
-		if (server != null) {
-			try {
-				server.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		 running = false;
+	        if (server != null && !server.isClosed()) {
+	            try {
+	                System.out.println("Closing server");
+	                server.close();
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	            }
+	        }
 	}
 
 	// add row connect client
@@ -199,6 +219,25 @@ public class ServerManageView extends JFrame {
 		}
 		for (int i = 0; i < this.clients.size(); i++) {
 			model.addRow(new Object[] {this.clients.get(i).getClient().getInetAddress().toString(),this.clients.get(i).getClient().getPort()+"","Connected" });
+		}
+	}
+	public void UpdateHistory() {
+		// clear old data and insert again
+		DefaultTableModel model = (DefaultTableModel) tableClient.getModel();
+		int rowCount = model.getRowCount();
+		// Remove rows one by one from the end of the table
+		for (int i = rowCount - 1; i >= 0; i--) {
+			model.removeRow(i);
+		}
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
+		// Set renderer for all columns
+		for (int i = 0; i < tableClient.getColumnCount(); i++) {
+			tableClient.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+		for (History value : this.histories) {
+			model.addRow(new Object[] {value.getIP(),value.getPort(),value.getTime().format(formatter),value.getAction() });
 		}
 	}
 	public void RemoveClient(int port)

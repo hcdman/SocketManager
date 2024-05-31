@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,8 +84,9 @@ public class ClientHandler implements Runnable {
 				}
 				if (pattern[0].equals("Book")) {
 					List<Event> events = EventReader.readEventsFromFile("src/data/events.json");
-					String idEvent = pattern[1];
-					int indexSchedule = Integer.parseInt(pattern[2]);
+					String tickets = pattern[1];
+					String idEvent = pattern[2];
+					int indexSchedule = Integer.parseInt(pattern[3]);
 					List<Zone> zones = new ArrayList<>();
 					Schedule schedule = new Schedule();
 					for (Event event : events) {
@@ -92,7 +95,7 @@ public class ClientHandler implements Runnable {
 						}
 					}
 					boolean flag = false;
-					for (int i = 3; i < pattern.length; i = i + 2) {
+					for (int i = 4; i < pattern.length; i = i + 2) {
 						String idZone = pattern[i];
 						String idSeat = pattern[i + 1];
 						System.out.println("seat: " + idSeat + "- zone: " + idZone);
@@ -107,7 +110,6 @@ public class ClientHandler implements Runnable {
 						out.writeObject(null);
 						out.flush();
 					} else {
-						System.out.println("yeah");
 						for (Event event : events) {
 							if (event.getEventId().equals(idEvent)) {
 								event.getSchedules().get(indexSchedule).setZones(zones);
@@ -115,6 +117,8 @@ public class ClientHandler implements Runnable {
 							}
 						}
 						this.view.events = events;
+						this.view.histories.add(new History(this.getClient().getInetAddress().toString(),this.getClient().getPort()+"",LocalDateTime.now(), "Book "+tickets+" tickets for event have id " + idEvent));
+						this.view.UpdateHistory();
 						EventWriter.writeEventsToFile(events, "src/data/events.json");
 						out.writeObject(schedule);
 						out.flush();
