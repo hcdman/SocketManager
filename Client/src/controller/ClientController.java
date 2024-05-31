@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.swing.JComboBox;
 
+import dto.Booked;
 import model.Event;
 import model.Schedule;
 import utils.MessageClient;
@@ -30,16 +31,18 @@ public class ClientController implements ActionListener, MouseListener {
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 
-	public ClientController(HomeView view,ObjectInputStream in,ObjectOutputStream out) {
+	public ClientController(HomeView view, ObjectInputStream in, ObjectOutputStream out) {
 		this.home = view;
 		this.in = in;
 		this.out = out;
 	}
-	public ClientController(DetailEventView view,ObjectInputStream in,ObjectOutputStream out) {
+
+	public ClientController(DetailEventView view, ObjectInputStream in, ObjectOutputStream out) {
 		this.detail = view;
 		this.in = in;
 		this.out = out;
 	}
+
 	public void startClientSocket(String host, int port) throws IOException {
 		try {
 			client = new Socket(host, port);
@@ -56,6 +59,7 @@ public class ClientController implements ActionListener, MouseListener {
 		this.connect = view;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		String command = e.getActionCommand();
@@ -68,7 +72,7 @@ public class ClientController implements ActionListener, MouseListener {
 				String message = MessageClient.GET_DATA;
 				out.writeObject(message);
 				out.flush();
-				this.home = new HomeView(this.in,this.out);
+				this.home = new HomeView(this.in, this.out);
 				this.home.events = (List<Event>) in.readObject();
 				this.connect.dispose();
 				this.home.setLocationRelativeTo(null);
@@ -79,14 +83,64 @@ public class ClientController implements ActionListener, MouseListener {
 			}
 			// error
 		}
+		if (command.equals("Confirm")) {
+			// get port and address to connect
+			try {
+				int indexSchedule = this.detail.comboBox.getSelectedIndex();
+				String msg = MessageClient.BOOK + " " + this.detail.event.getEventId() + " " + indexSchedule;
+
+				for (Booked value : this.detail.booking) {
+					msg += " " + value.getZoneId() + " " + value.getSeatId();
+				}
+				this.detail.booking.clear();
+				this.detail.showSeatBooking();
+				this.out.writeObject(msg);
+				this.out.flush();
+
+				// Receive data from server
+				try {
+					Schedule schedule = (Schedule) this.in.readObject();
+					this.detail.displaySeatingChart(schedule);
+				} catch (Exception e0) {
+					this.detail.ShowError("Some seat have been booked!");
+					msg = MessageClient.SCHEDULE + " " +this.detail.event.getEventId()+" "+ indexSchedule;
+					this.out.writeObject(msg);
+					this.out.flush();
+					Schedule schedule;
+					try {
+						schedule = (Schedule) this.in.readObject();
+						this.detail.displaySeatingChart(schedule);
+					} catch (ClassNotFoundException e1) {
+						e1.printStackTrace();
+					}
+
+				}
+
+			} catch (IOException e1) {
+
+				e1.printStackTrace();
+			}
+
+			// error
+		}
+
 		int index = -1;
 		if (e.getSource() instanceof JComboBox) {
 			JComboBox<?> comboBox = (JComboBox<?>) e.getSource();
 			index = comboBox.getSelectedIndex();
 		}
 		if (index != -1) {
-			Schedule selectedSchedule = this.detail.event.getSchedules().get(index);
-			this.detail.displaySeatingChart(selectedSchedule);
+			try {
+				String msg = MessageClient.SCHEDULE + " "+this.detail.event.getEventId()+" " + index;
+				this.out.writeObject(msg);
+				this.out.flush();
+				Schedule schedule = (Schedule) this.in.readObject();
+				this.detail.displaySeatingChart(schedule);
+			} catch (IOException | ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
 		}
 	}
 
@@ -102,9 +156,8 @@ public class ClientController implements ActionListener, MouseListener {
 				try {
 					this.out.writeObject(message);
 					this.out.flush();
-					
-					
-					this.detail = new DetailEventView(this.in,this.out);
+
+					this.detail = new DetailEventView(this.in, this.out);
 					this.detail.event = (Event) in.readObject();
 					this.home.setEnabled(false);
 					this.detail.setLocationRelativeTo(null);

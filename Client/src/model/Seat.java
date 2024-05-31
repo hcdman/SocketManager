@@ -8,16 +8,25 @@ public class Seat implements Serializable {
     private int rowNumber;
     private int seatNumber;
     private boolean isBooked;
+    private String zoneId;
     public Seat()
     {
-    	
+   
     }
-	public Seat(String seatId, int rowNumber, int seatNumber, boolean isBooked) {
+	
+	public Seat(String seatId, int rowNumber, int seatNumber, boolean isBooked, String zoneId) {
 		super();
 		this.seatId = seatId;
 		this.rowNumber = rowNumber;
 		this.seatNumber = seatNumber;
 		this.isBooked = isBooked;
+		this.zoneId = zoneId;
+	}
+	public String getZoneId() {
+		return zoneId;
+	}
+	public void setZoneId(String zoneId) {
+		this.zoneId = zoneId;
 	}
 	public String getSeatId() {
 		return seatId;

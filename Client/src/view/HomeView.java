@@ -41,7 +41,6 @@ public class HomeView extends JFrame {
 		lblEvent.setBounds(397, 35, 75, 51);
 		contentPane.add(lblEvent);
 		// Data events
-		// Schedule
 		table = new JTable();
 		table.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		table.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
