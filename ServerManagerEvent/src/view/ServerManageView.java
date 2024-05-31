@@ -48,7 +48,7 @@ public class ServerManageView extends JFrame {
 	public ServerSocket server;
 	public JTable table;
 	public JTable tableClient;
-	private List<Event> events;
+	public List<Event> events;
 	private final ArrayList<ClientHandler> clients = new ArrayList<>();
 	private final ExecutorService pool = Executors.newFixedThreadPool(4);
 

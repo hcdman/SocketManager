@@ -96,14 +96,15 @@ public class ManageEventController implements ActionListener, MouseListener {
 			double price = Double.parseDouble(this.addEventView.price.getText());
 			int rows = Integer.parseInt(this.addEventView.rows.getText());
 			int columns = Integer.parseInt(this.addEventView.seats.getText());
+			String zoneId = "Z" + this.addEventView.zones.size();
 			List<Seat> seats = new ArrayList<>();
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < columns; j++) {
-					seats.add(new Seat(nameZone + i + j, i, j, false));
+					seats.add(new Seat(nameZone + i + j, i, j, false,zoneId));
 				}
 			}
 			this.addEventView.zones
-					.add(new Zone("Z" + this.addEventView.zones.size(), nameZone, price, rows, columns, seats));
+					.add(new Zone(zoneId, nameZone, price, rows, columns, seats));
 			int indexSelect = this.addEventView.comboBox.getSelectedIndex();
 			this.addEventView.schedules.get(indexSelect).setZones(this.addEventView.zones);
 			// update show zone
@@ -116,8 +117,9 @@ public class ManageEventController implements ActionListener, MouseListener {
 			String discription = this.addEventView.Discription.getText();
 			LocalDate dateEvent = this.addEventView.dateEvent.getDate().toInstant().atZone(ZoneId.systemDefault())
 					.toLocalDate();
-			this.addEventView.events.add(new Event("E" + this.addEventView.events.size(), nameEvent, discription,
-					dateEvent, this.addEventView.schedules));
+			Event event = new Event("E" + this.addEventView.events.size(), nameEvent, discription,
+					dateEvent, this.addEventView.schedules);
+			this.addEventView.events.add(event);
 			try {
 				EventWriter.writeEventsToFile(this.addEventView.events, "src/data/events.json");
 			} catch (IOException e1) {
@@ -129,17 +131,14 @@ public class ManageEventController implements ActionListener, MouseListener {
 			this.view.setEnabled(false);
 			this.server.setLocationRelativeTo(null);
 			this.server.setVisible(true);
+			this.server.events = this.view.events;
 			this.server.initServer();
 			this.server.addWindowListener(new WindowAdapter() {
 				@Override
 				public void windowClosed(WindowEvent e) {
 					view.setEnabled(true);
+					view.events = server.events;
 					view.setVisible(true);
-					try {
-						EventWriter.writeEventsToFile(view.events, "src/data/events.json");
-					} catch (IOException e1) {
-						e1.printStackTrace();
-					}
 					view.showEvents();
 					server.endSocket();
 				}

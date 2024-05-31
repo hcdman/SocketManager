@@ -53,6 +53,10 @@ public class HomeView extends JFrame {
 					frame.setVisible(true);
 					//read and show data
 					frame.events= EventReader.readEventsFromFile("src/data/events.json");
+					if(frame.events.isEmpty())
+					{
+						frame.events = new ArrayList<>();
+					}
 					frame.showEvents();
 				} catch (Exception e) {
 					e.printStackTrace();
