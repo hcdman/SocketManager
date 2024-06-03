@@ -18,6 +18,7 @@ import java.util.TreeSet;
 
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import model.Event;
 import model.Schedule;
@@ -47,6 +48,7 @@ public class ManageEventController implements ActionListener, MouseListener {
 	public ManageEventController(DetailEventView view) {
 		this.detailView = view;
 	}
+
 	public ManageEventController(ServerManageView view) {
 		this.server = view;
 	}
@@ -86,12 +88,37 @@ public class ManageEventController implements ActionListener, MouseListener {
 		}
 
 		if (command.equals("Add schedule")) {
+			// check error not have any data
+			if (this.addEventView.startTime.getTime() == null || this.addEventView.endTime.getTime() == null) {
+				this.addEventView.ShowError("You have to set value of time !");
+				return;
+			}
+			// check range time
+			if (this.addEventView.endTime.getTime().compareTo(this.addEventView.startTime.getTime()) <= 0) {
+				this.addEventView.ShowError("Value of end time and start time is not valid!");
+				return;
+			}
+			// check range time is existed
+			if (this.addEventView.checkTimeExisted()) {
+				this.addEventView.ShowError("Exist schedule in this time period !");
+				return;
+			}
+
 			this.addEventView.schedules.add(new Schedule("SCH" + this.addEventView.schedules.size(),
 					this.addEventView.startTime.getTime(), this.addEventView.endTime.getTime(), new ArrayList<>()));
 			this.addEventView.updateDataSchedule();
 			this.addEventView.makeEmptyScheduleForm();
 		}
 		if (command.equals("Add zone")) {
+			if (this.addEventView.comboBox.getSelectedIndex() == -1) {
+				this.addEventView.ShowError("Don't have any shedule is selected !");
+				return;
+			}
+			// check is empty field
+			if (this.addEventView.checkIsBlankFormZone()) {
+				this.addEventView.ShowError("You have to fill completely information of a zone!");
+				return;
+			}
 			String nameZone = this.addEventView.nameZone.getText();
 			double price = Double.parseDouble(this.addEventView.price.getText());
 			int rows = Integer.parseInt(this.addEventView.rows.getText());
@@ -100,11 +127,10 @@ public class ManageEventController implements ActionListener, MouseListener {
 			List<Seat> seats = new ArrayList<>();
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < columns; j++) {
-					seats.add(new Seat(nameZone + i + j, i, j, false,zoneId));
+					seats.add(new Seat(nameZone + i + j, i, j, false, zoneId));
 				}
 			}
-			this.addEventView.zones
-					.add(new Zone(zoneId, nameZone, price, rows, columns, seats));
+			this.addEventView.zones.add(new Zone(zoneId, nameZone, price, rows, columns, seats));
 			int indexSelect = this.addEventView.comboBox.getSelectedIndex();
 			this.addEventView.schedules.get(indexSelect).setZones(this.addEventView.zones);
 			// update show zone
@@ -112,13 +138,34 @@ public class ManageEventController implements ActionListener, MouseListener {
 			this.addEventView.makeEmptyZoneForm();
 		}
 		if (command.equals("Save event")) {
+			// check fill data
+			if (this.addEventView.nameEvent.getText().isBlank() || this.addEventView.Description.getText().isBlank()
+					|| this.addEventView.dateEvent.getDate() == null) {
+				this.addEventView.ShowError("You have to fill completely information of your event !");
+				return;
+			}
 			// get data event
 			String nameEvent = this.addEventView.nameEvent.getText();
-			String discription = this.addEventView.Discription.getText();
+			String description = this.addEventView.Description.getText();
 			LocalDate dateEvent = this.addEventView.dateEvent.getDate().toInstant().atZone(ZoneId.systemDefault())
 					.toLocalDate();
-			Event event = new Event("E" + this.addEventView.events.size(), nameEvent, discription,
-					dateEvent, this.addEventView.schedules);
+
+			// check valid date event
+			if (dateEvent.compareTo(LocalDate.now()) <= 0) {
+				this.addEventView.ShowError("Date of event is not valid !");
+				return;
+			}
+			if (this.addEventView.schedules.size() == 0) {
+				this.addEventView.ShowError("Event have to have at least one schedules !");
+				return;
+			}
+			// Check have data of schedule and zone
+			if (this.addEventView.checkLoseData()) {
+				this.addEventView.ShowError("All schedules have to set data of seat !");
+				return;
+			}
+			Event event = new Event("E" + this.addEventView.events.size(), nameEvent, description, dateEvent,
+					this.addEventView.schedules);
 			this.addEventView.events.add(event);
 			try {
 				EventWriter.writeEventsToFile(this.addEventView.events, "src/data/events.json");
@@ -143,6 +190,24 @@ public class ManageEventController implements ActionListener, MouseListener {
 					server.endSocket();
 				}
 			});
+		}
+		if (command.equals("Delete")) {
+			int indexSchedule = this.addEventView.table.getSelectedRow();
+			int indexZone = this.addEventView.tableSeat.getSelectedRow();
+			if (indexSchedule >= 0) {
+				int indexCombobox = this.addEventView.comboBox.getSelectedIndex();
+				this.addEventView.schedules.remove(indexSchedule);
+				if (indexSchedule == indexCombobox) {
+					this.addEventView.zones.clear();
+					this.addEventView.updateDataZone();
+				}
+				this.addEventView.updateDataSchedule();
+			}
+			if (indexZone >= 0) {
+				this.addEventView.zones.remove(indexZone);
+				this.addEventView.updateDataZone();
+			}
+
 		}
 
 	}
@@ -181,7 +246,12 @@ public class ManageEventController implements ActionListener, MouseListener {
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
+//		if (SwingUtilities.isRightMouseButton(e)) {
+//				int index = this.addEventView.table.locationToIndex(e.getPoint());
+//				this.listView.listFavorite.setSelectedIndex(index);
+//				this.listView.showPopupMenu(e);
+//			
+//		}
 
 	}
 

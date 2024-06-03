@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -30,8 +31,8 @@ public class DetailEventView extends JFrame {
 	public JPanel contentPane;
 	public JTextField nameEvent;
 	private JLabel lblNameLabel;
-	private JLabel lblDiscription;
-	public JTextField Discription;
+	private JLabel lblDescription;
+	public JTextField Description;
 	private JLabel lblDate;
 	public JTextField dateEvent;
 	public JComboBox<String> comboBox;
@@ -56,20 +57,20 @@ public class DetailEventView extends JFrame {
 		nameEvent.setBounds(386, 86, 187, 30);
 		contentPane.add(nameEvent);
 		nameEvent.setColumns(10);
-
+		nameEvent.setEditable(false);
 		lblNameLabel = new JLabel("Name event");
 		lblNameLabel.setBounds(299, 89, 67, 13);
 		contentPane.add(lblNameLabel);
 
-		lblDiscription = new JLabel("Discription");
-		lblDiscription.setBounds(306, 139, 60, 13);
-		contentPane.add(lblDiscription);
+		lblDescription = new JLabel("Description");
+		lblDescription.setBounds(306, 139, 60, 13);
+		contentPane.add(lblDescription);
 
-		Discription = new JTextField();
-		Discription.setColumns(10);
-		Discription.setBounds(386, 125, 187, 42);
-		contentPane.add(Discription);
-
+		Description = new JTextField();
+		Description.setColumns(10);
+		Description.setBounds(386, 125, 187, 42);
+		contentPane.add(Description);
+		Description.setEditable(false);
 		lblDate = new JLabel("Date");
 		lblDate.setBounds(306, 183, 60, 13);
 		contentPane.add(lblDate);
@@ -77,6 +78,7 @@ public class DetailEventView extends JFrame {
 		dateEvent.setColumns(10);
 		dateEvent.setBounds(386, 175, 187, 30);
 		contentPane.add(dateEvent);
+		dateEvent.setEditable(false);
 		// display seat
 
 		comboBox = new JComboBox<String>();
@@ -110,8 +112,9 @@ public class DetailEventView extends JFrame {
 
 	public void showDataEvent() {
 		this.nameEvent.setText(event.getName());
-		this.Discription.setText(event.getDescription());
-		this.dateEvent.setText(event.getDate() + "");
+		this.Description.setText(event.getDescription());
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+		this.dateEvent.setText(event.getDate().format(formatter) + "");
 		// show combo box
 		this.comboBox.removeAllItems();
 		for (Schedule schedule : event.getSchedules()) {

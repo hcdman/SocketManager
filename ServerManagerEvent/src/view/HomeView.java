@@ -86,8 +86,7 @@ public class HomeView extends JFrame {
 		JButton btnAddNewEvent = new JButton("Add new event");
 		btnAddNewEvent.setBounds(641, 91, 121, 21);
 		contentPane.add(btnAddNewEvent);
-		// Data events
-		// Schedule
+		
 		table = new JTable();
 		table.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		table.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
@@ -113,17 +112,15 @@ public class HomeView extends JFrame {
 		btnAddNewEvent.addActionListener(action);
 		btnOpenServer.addActionListener(action);
 	}
+	
 	public void showEvents() {
-		// clear old data and insert again
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		int rowCount = model.getRowCount();
-		// Remove rows one by one from the end of the table
 		for (int i = rowCount - 1; i >= 0; i--) {
 			model.removeRow(i);
 		}
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
-		// Set renderer for all columns
 		for (int i = 0; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 		}
