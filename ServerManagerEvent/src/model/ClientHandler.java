@@ -7,10 +7,12 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import utils.EventReader;
-import utils.EventWriter;
+import utils.ObjectReader;
+import utils.ObjectWriter;
 import view.ServerManageView;
 
 public class ClientHandler implements Runnable {
@@ -59,17 +61,17 @@ public class ClientHandler implements Runnable {
 				String[] pattern = clientMsg.split(" ");
 				System.out.println(pattern[0]);
 				if (clientMsg.equals("All")) {
-					out.writeObject(EventReader.readEventsFromFile("src/data/events.json"));
+					out.writeObject(ObjectReader.readObjectsFromFile("src/data/events.json",Event.class));
 					out.flush();
 				}
 				if (pattern[0].equals("GetEvent")) {
 					int index = Integer.parseInt(pattern[1]);
-					Event event = EventReader.readEventsFromFile("src/data/events.json").get(index);
+					Event event = ObjectReader.readObjectsFromFile("src/data/events.json",Event.class).get(index);
 					out.writeObject(event);
 					out.flush();
 				}
 				if (pattern[0].equals("GetSchedule")) {
-					List<Event> events = EventReader.readEventsFromFile("src/data/events.json");
+					List<Event> events = ObjectReader.readObjectsFromFile("src/data/events.json",Event.class);
 					Event event = new Event();
 					String idEvent = pattern[1];
 					int indexSchedule = Integer.parseInt(pattern[2]);
@@ -83,10 +85,15 @@ public class ClientHandler implements Runnable {
 					out.flush();
 				}
 				if (pattern[0].equals("Book")) {
-					List<Event> events = EventReader.readEventsFromFile("src/data/events.json");
-					String tickets = pattern[1];
-					String idEvent = pattern[2];
-					int indexSchedule = Integer.parseInt(pattern[3]);
+					List<Event> events = ObjectReader.readObjectsFromFile("src/data/events.json",Event.class);
+					List<UserBooked> users = ObjectReader.readObjectsFromFile("src/data/databooked.json",UserBooked.class);
+					//use map to get zone and id all seats in zone
+					Map<String,String> dataSeats = new LinkedHashMap<String, String>();
+					String phoneNumber = pattern[1];
+					String tickets = pattern[2];
+					String idEvent = pattern[3];
+					String idSeats = "";
+					int indexSchedule = Integer.parseInt(pattern[4]);
 					List<Zone> zones = new ArrayList<>();
 					Schedule schedule = new Schedule();
 					for (Event event : events) {
@@ -95,16 +102,17 @@ public class ClientHandler implements Runnable {
 						}
 					}
 					boolean flag = false;
-					for (int i = 4; i < pattern.length; i = i + 2) {
+					for (int i = 5; i < pattern.length; i = i + 2) {
 						String idZone = pattern[i];
 						String idSeat = pattern[i + 1];
+						dataSeats.put(idZone,dataSeats.getOrDefault(idZone, "")+" "+idSeat);
+						idSeats +=idSeat+" ";
 						System.out.println("seat: " + idSeat + "- zone: " + idZone);
 						//Can't book one seat
 						if (!setBooking(zones, idZone, idSeat)) {
 							flag = true;
 							break;
 						}
-
 					}
 					if (flag) {
 						out.writeObject(null);
@@ -116,10 +124,16 @@ public class ClientHandler implements Runnable {
 								schedule = event.getSchedules().get(indexSchedule);
 							}
 						}
+						for(Map.Entry<String, String> value : dataSeats.entrySet())
+						{
+							users.add(new UserBooked(phoneNumber, idEvent,schedule.getScheduleId(),value.getKey(),value.getValue(),LocalDateTime.now()));
+						}
+						//write data use to file
 						this.view.events = events;
-						this.view.histories.add(new History(this.getClient().getInetAddress().toString(),this.getClient().getPort()+"",LocalDateTime.now(), "Book "+tickets+" tickets for event have id " + idEvent));
+						this.view.histories.add(new ActionClient(this.getClient().getInetAddress().toString(),this.getClient().getPort()+"",LocalDateTime.now(), "Book "+tickets+" tickets for event have id " + idEvent));
 						this.view.UpdateHistory();
-						EventWriter.writeEventsToFile(events, "src/data/events.json");
+						ObjectWriter.writeObjectsToFile(events, "src/data/events.json");
+						ObjectWriter.writeObjectsToFile(users, "src/data/databooked.json");
 						out.writeObject(schedule);
 						out.flush();
 						

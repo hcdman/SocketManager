@@ -15,7 +15,7 @@ import javax.swing.table.DefaultTableModel;
 import controller.ManageEventController;
 import model.Event;
 import model.Schedule;
-import utils.EventReader;
+import utils.ObjectReader;
 
 import javax.swing.JLabel;
 import java.awt.Font;
@@ -52,11 +52,7 @@ public class HomeView extends JFrame {
 					frame.setLocationRelativeTo(null);
 					frame.setVisible(true);
 					//read and show data
-					frame.events= EventReader.readEventsFromFile("src/data/events.json");
-					if(frame.events.isEmpty())
-					{
-						frame.events = new ArrayList<>();
-					}
+					frame.events= ObjectReader.readObjectsFromFile("src/data/events.json",Event.class);
 					frame.showEvents();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -106,11 +102,16 @@ public class HomeView extends JFrame {
 		JButton btnOpenServer = new JButton("Open server");
 		btnOpenServer.setBounds(104, 91, 121, 21);
 		contentPane.add(btnOpenServer);
+		
+		JButton btnSeatBooked = new JButton("Seat booked");
+		btnSeatBooked.setBounds(370, 91, 121, 21);
+		contentPane.add(btnSeatBooked);
 		// Actions
 		ActionListener action = new ManageEventController(this);
 		table.addMouseListener((MouseListener) action);
 		btnAddNewEvent.addActionListener(action);
 		btnOpenServer.addActionListener(action);
+		btnSeatBooked.addActionListener(action);
 	}
 	
 	public void showEvents() {

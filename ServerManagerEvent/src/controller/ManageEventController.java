@@ -17,18 +17,19 @@ import java.util.List;
 import java.util.TreeSet;
 
 import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import model.Event;
 import model.Schedule;
 import model.Seat;
+import model.UserBooked;
 import model.Zone;
-import utils.EventWriter;
+import utils.ObjectReader;
+import utils.ObjectWriter;
 import view.AddEventView;
 import view.DetailEventView;
 import view.HomeView;
 import view.ServerManageView;
+import view.UserBookedView;
 
 public class ManageEventController implements ActionListener, MouseListener {
 
@@ -36,6 +37,7 @@ public class ManageEventController implements ActionListener, MouseListener {
 	private AddEventView addEventView;
 	private DetailEventView detailView;
 	private ServerManageView server;
+	private UserBookedView booked;
 
 	public ManageEventController(HomeView homeView) {
 		this.view = homeView;
@@ -86,7 +88,26 @@ public class ManageEventController implements ActionListener, MouseListener {
 				}
 			});
 		}
-
+		if (command.equals("Seat booked")) {
+			this.booked = new UserBookedView();
+			this.view.setEnabled(false);
+			this.booked.setLocationRelativeTo(null);
+			this.booked.setVisible(true);
+			try {
+				this.booked.users = ObjectReader.readObjectsFromFile("src/data/databooked.json",UserBooked.class);
+				this.booked.showUsers();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			this.booked.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosed(WindowEvent e) {
+					view.setEnabled(true);
+					view.setVisible(true);
+					view.showEvents();
+				}
+			});
+		}
 		if (command.equals("Add schedule")) {
 			// check error not have any data
 			if (this.addEventView.startTime.getTime() == null || this.addEventView.endTime.getTime() == null) {
@@ -175,7 +196,7 @@ public class ManageEventController implements ActionListener, MouseListener {
 			this.addEventView.updateDataSchedule();
 			this.addEventView.updateDataZone();
 			try {
-				EventWriter.writeEventsToFile(this.addEventView.events, "src/data/events.json");
+				ObjectWriter.writeObjectsToFile(this.addEventView.events, "src/data/events.json");
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}

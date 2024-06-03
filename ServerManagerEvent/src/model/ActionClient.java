@@ -4,14 +4,13 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-public class History implements Serializable {
+public class ActionClient implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String IP;
 	private String port;
 	private LocalDateTime time;
 	private String action;
-	
-	public History(String iP, String port, LocalDateTime time, String action) {
+	public ActionClient(String iP, String port, LocalDateTime time, String action) {
 		super();
 		IP = iP;
 		this.port = port;

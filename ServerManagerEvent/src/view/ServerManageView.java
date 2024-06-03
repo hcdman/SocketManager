@@ -36,8 +36,8 @@ import com.github.lgooddatepicker.components.TimePickerSettings;
 import controller.ManageEventController;
 import model.ClientHandler;
 import model.Event;
-import model.History;
-import utils.EventReader;
+import model.ActionClient;
+import utils.ObjectReader;
 
 public class ServerManageView extends JFrame {
 
@@ -53,7 +53,7 @@ public class ServerManageView extends JFrame {
 	public JTable tableClient;
 	public List<Event> events;
 	private final ArrayList<ClientHandler> clients = new ArrayList<>();
-	public ArrayList<History> histories = new ArrayList<>();
+	public ArrayList<ActionClient> histories = new ArrayList<>();
 	private final ExecutorService pool = Executors.newFixedThreadPool(4);
 
 	public ServerManageView() {
@@ -74,7 +74,7 @@ public class ServerManageView extends JFrame {
 		nameIP.setBounds(386, 86, 187, 30);
 		contentPane.add(nameIP);
 		nameIP.setColumns(10);
-
+		nameIP.setEditable(false);
 		lblNameLabel = new JLabel("IP");
 		lblNameLabel.setBounds(309, 94, 67, 13);
 		contentPane.add(lblNameLabel);
@@ -87,6 +87,7 @@ public class ServerManageView extends JFrame {
 		Port.setColumns(10);
 		Port.setBounds(386, 125, 187, 30);
 		contentPane.add(Port);
+		Port.setEditable(false);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		// Schedule
 		table = new JTable();
@@ -236,7 +237,7 @@ public class ServerManageView extends JFrame {
 			tableClient.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 		}
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
-		for (History value : this.histories) {
+		for (ActionClient value : this.histories) {
 			model.addRow(new Object[] {value.getIP(),value.getPort(),value.getTime().format(formatter),value.getAction() });
 		}
 	}
