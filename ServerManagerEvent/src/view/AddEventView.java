@@ -389,6 +389,12 @@ public class AddEventView extends JFrame {
 		this.rows.setText("");
 		this.seats.setText("");
 	}
+	public void makeEmptyEventForm()
+	{
+		this.nameEvent.setText("");
+		this.Description.setText("");
+		this.dateEvent.cleanup();
+	}
 	public boolean checkIsBlankFormZone()
 	{
 		if(this.nameZone.getText().isBlank()||this.price.getText().isBlank()||this.rows.getText().isBlank()||

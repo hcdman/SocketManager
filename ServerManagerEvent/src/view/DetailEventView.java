@@ -2,6 +2,7 @@ package view;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -9,12 +10,14 @@ import java.awt.event.ActionListener;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import javax.swing.border.EmptyBorder;
@@ -38,10 +41,11 @@ public class DetailEventView extends JFrame {
 	public JComboBox<String> comboBox;
 	public Event event;
 	private JPanel seatingChartPanel;
+	private JLabel lblSchedule;
 
 	public DetailEventView() {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(200, 200, 1008, 773);
+		setBounds(200, 200, 1040, 856);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setResizable(false);
@@ -80,31 +84,45 @@ public class DetailEventView extends JFrame {
 		contentPane.add(dateEvent);
 		dateEvent.setEditable(false);
 		// display seat
-
 		comboBox = new JComboBox<String>();
-		comboBox.setBounds(50, 258, 111, 21);
+		comboBox.setBounds(132, 260, 111, 21);
 		contentPane.add(comboBox);
-		seatingChartPanel = new JPanel();
-		seatingChartPanel.setBounds(50, 300, 900, 400);
-		contentPane.add(seatingChartPanel);
-		
+		// contentPane.add(seatingChartPanel);
+
 		JButton btnNewButton = new JButton("");
 		btnNewButton.setBackground(Color.RED);
-		btnNewButton.setBounds(351, 260, 67, 30);
-		
+		btnNewButton.setBounds(726, 258, 67, 30);
+
 		JButton btnNotBook = new JButton("");
 		btnNotBook.setBackground(Color.LIGHT_GRAY);
-		btnNotBook.setBounds(548, 258, 67, 30);
+		btnNotBook.setBounds(883, 258, 67, 30);
 		contentPane.add(btnNewButton);
 		contentPane.add(btnNotBook);
-		
+
 		JLabel lblBooked = new JLabel("BOOKED");
-		lblBooked.setBounds(281, 266, 60, 13);
+		lblBooked.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblBooked.setBounds(656, 268, 60, 13);
 		contentPane.add(lblBooked);
-		
+
 		JLabel lblNotBook = new JLabel("NOT BOOK");
-		lblNotBook.setBounds(468, 266, 80, 13);
+		lblNotBook.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblNotBook.setBounds(814, 268, 67, 13);
 		contentPane.add(lblNotBook);
+		
+		seatingChartPanel = new JPanel();
+		JScrollPane scrollPane = new JScrollPane(seatingChartPanel);
+		scrollPane.setBounds(50, 300, 900, 500);
+		contentPane.add(scrollPane);
+		
+		JLabel lblSeating = new JLabel("Seating chart ");
+		lblSeating.setFont(new Font("Tahoma", Font.BOLD, 20));
+		lblSeating.setBounds(383, 241, 172, 51);
+		contentPane.add(lblSeating);
+		
+		lblSchedule = new JLabel("Schedule");
+		lblSchedule.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblSchedule.setBounds(61, 264, 75, 13);
+		contentPane.add(lblSchedule);
 		// action
 		ActionListener action = new ManageEventController(this);
 		comboBox.addActionListener(action);
@@ -124,18 +142,36 @@ public class DetailEventView extends JFrame {
 
 	public void displaySeatingChart(Schedule schedule) {
 		seatingChartPanel.removeAll();
-		seatingChartPanel.setLayout(new GridLayout(10, 10)); // Adjust the grid size as needed
+		seatingChartPanel.setLayout(new BoxLayout(seatingChartPanel, BoxLayout.PAGE_AXIS));
 		for (Zone zone : schedule.getZones()) {
-			for (Seat seat : zone.getSeats()) {
-				JButton seatButton = new JButton();
-				seatButton.setPreferredSize(new Dimension(30, 30));
-				seatButton.setText(seat.getSeatId());
-				if (seat.isBooked()) {
-					seatButton.setBackground(Color.RED);
-				} else {
-					seatButton.setBackground(Color.LIGHT_GRAY);
+			JLabel lblZone = new JLabel(zone.getName());
+			lblZone.setFont(new Font("Tahoma", Font.BOLD, 15));JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER)) {
+			    @Override
+			    public Dimension getMaximumSize() {
+			        return getPreferredSize();
+			    }
+			};
+			panel.add(lblZone);
+			JPanel rowZone = new JPanel(); // Create a new panel for each row of seats
+			rowZone.setLayout(new BoxLayout(rowZone, BoxLayout.LINE_AXIS));
+			rowZone.add(panel);
+			seatingChartPanel.add(rowZone); // Add the row panel to the overall layout
+			for (int i = 0; i < zone.getRows(); i++) {
+				JPanel rowPanel = new JPanel(); // Create a new panel for each row of seats
+				rowPanel.setLayout(new BoxLayout(rowPanel, BoxLayout.LINE_AXIS));
+				for (int j = 0; j < zone.getColumn(); j++) {
+					Seat seat = zone.getSeats().get(i * zone.getColumn() + j);
+					JButton seatButton = new JButton();
+					seatButton.setText(seat.getSeatId());
+					if (seat.isBooked()) {
+						seatButton.setBackground(Color.RED);
+					} else {
+						seatButton.setBackground(Color.LIGHT_GRAY);
+					}
+					rowPanel.add(seatButton);
 				}
-				seatingChartPanel.add(seatButton);
+				seatingChartPanel.add(rowPanel); // Add the row panel to the overall layout
+				seatingChartPanel.add(Box.createRigidArea(new Dimension(0, 5))); // Add some vertical space between rows
 			}
 		}
 		seatingChartPanel.revalidate();

@@ -122,17 +122,18 @@ public class ManageEventController implements ActionListener, MouseListener {
 			String nameZone = this.addEventView.nameZone.getText();
 			double price = Double.parseDouble(this.addEventView.price.getText());
 			int rows = Integer.parseInt(this.addEventView.rows.getText());
+			int ascii = 65 + this.addEventView.zones.size();
 			int columns = Integer.parseInt(this.addEventView.seats.getText());
 			String zoneId = "Z" + this.addEventView.zones.size();
 			List<Seat> seats = new ArrayList<>();
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < columns; j++) {
-					seats.add(new Seat(nameZone + i + j, i, j, false, zoneId));
+					seats.add(new Seat(Character.toString((char)ascii) + i + j, i, j, false, zoneId));
 				}
 			}
 			this.addEventView.zones.add(new Zone(zoneId, nameZone, price, rows, columns, seats));
 			int indexSelect = this.addEventView.comboBox.getSelectedIndex();
-			this.addEventView.schedules.get(indexSelect).setZones(this.addEventView.zones);
+			this.addEventView.schedules.get(indexSelect).setZones(new ArrayList<>(this.addEventView.zones));
 			// update show zone
 			this.addEventView.updateDataZone();
 			this.addEventView.makeEmptyZoneForm();
@@ -165,8 +166,14 @@ public class ManageEventController implements ActionListener, MouseListener {
 				return;
 			}
 			Event event = new Event("E" + this.addEventView.events.size(), nameEvent, description, dateEvent,
-					this.addEventView.schedules);
+					new ArrayList<>(this.addEventView.schedules));
 			this.addEventView.events.add(event);
+			this.addEventView.makeEmptyEventForm();
+			this.addEventView.ShowSuccess("Add new event successfully !");
+			this.addEventView.schedules.clear();
+			this.addEventView.zones.clear();
+			this.addEventView.updateDataSchedule();
+			this.addEventView.updateDataZone();
 			try {
 				EventWriter.writeEventsToFile(this.addEventView.events, "src/data/events.json");
 			} catch (IOException e1) {
