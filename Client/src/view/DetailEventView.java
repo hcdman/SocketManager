@@ -3,6 +3,7 @@ package view;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -98,48 +101,49 @@ public class DetailEventView extends JFrame {
 		comboBox.setBounds(50, 258, 111, 21);
 		contentPane.add(comboBox);
 		seatingChartPanel = new JPanel();
-		seatingChartPanel.setBounds(50, 300, 900, 400);
-		contentPane.add(seatingChartPanel);
-		
+		JScrollPane scrollSeat = new JScrollPane(seatingChartPanel);
+		scrollSeat.setBounds(50, 300, 900, 400);
+		contentPane.add(scrollSeat);
+
 		JButton btnNewButton = new JButton("");
 		btnNewButton.setBackground(Color.RED);
 		btnNewButton.setBounds(351, 260, 67, 30);
-		
+
 		JButton btnNotBook = new JButton("");
 		btnNotBook.setBackground(Color.LIGHT_GRAY);
 		btnNotBook.setBounds(548, 258, 67, 30);
 		contentPane.add(btnNewButton);
 		contentPane.add(btnNotBook);
-		
+
 		JLabel lblBooked = new JLabel("BOOKED");
 		lblBooked.setBounds(281, 266, 60, 13);
 		contentPane.add(lblBooked);
-		
+
 		JLabel lblNotBook = new JLabel("NOT BOOK");
 		lblNotBook.setBounds(468, 266, 80, 13);
 		contentPane.add(lblNotBook);
-		
+
 		JButton btnConfirm = new JButton("Confirm");
 		btnConfirm.setBounds(1109, 615, 85, 21);
 		contentPane.add(btnConfirm);
-		
+
 		textTotal = new JTextField();
 		textTotal.setColumns(10);
 		textTotal.setBounds(1069, 564, 187, 30);
 		contentPane.add(textTotal);
-		
+
 		JLabel lblTotal = new JLabel("Total");
 		lblTotal.setBounds(1005, 572, 60, 13);
 		contentPane.add(lblTotal);
-		//show seat booked
+		// show seat booked
 		table = new JTable();
 		table.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		table.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		// Disable table's editing mode
 		table.setDefaultEditor(Object.class, null);
 		// set column name of table
-		table.setModel(
-				new DefaultTableModel(new Object[][] {}, new String[] { "STT", "Seat Id", "Zone ID", "Name Zone","Price" }));
+		table.setModel(new DefaultTableModel(new Object[][] {},
+				new String[] { "STT", "Seat Id", "Zone ID", "Name Zone", "Price" }));
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 		for (int i = 0; i < table.getColumnCount(); i++) {
@@ -149,10 +153,10 @@ public class DetailEventView extends JFrame {
 		scrollPane.setBounds(960, 300, 368, 243);
 		contentPane.add(scrollPane);
 		// action
-		ActionListener action = new ClientController(this,in,out);
+		ActionListener action = new ClientController(this, in, out);
 		comboBox.addActionListener(action);
 		btnConfirm.addActionListener(action);
-		
+
 	}
 
 	public void showDataEvent() {
@@ -168,51 +172,67 @@ public class DetailEventView extends JFrame {
 
 	public void displaySeatingChart(Schedule schedule) {
 		seatingChartPanel.removeAll();
-		seatingChartPanel.setLayout(new GridLayout(10, 10)); // Adjust the grid size as needed
+		seatingChartPanel.setLayout(new BoxLayout(seatingChartPanel, BoxLayout.PAGE_AXIS));
 		for (Zone zone : schedule.getZones()) {
-			for (Seat seat : zone.getSeats()) {
-				JButton seatButton = new JButton();
-				seatButton.setPreferredSize(new Dimension(30, 30));
-				seatButton.setText(seat.getSeatId());
-				if (seat.isBooked()) {
-					seatButton.setBackground(Color.RED);
-				} else {
-					seatButton.setBackground(Color.LIGHT_GRAY);
-					seatButton.addActionListener(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            if(seatButton.getBackground().equals(Color.GREEN))
-                            {
-                            	seatButton.setBackground(Color.LIGHT_GRAY);
-                            	removeSeat(seat.getSeatId());
-                            }
-                            else
-                            {
-                            	  seatButton.setBackground(Color.GREEN);
-                            	  booking.add(new Booked(seat.getSeatId(),zone.getZoneId(),zone.getName(),zone.getTicketPrice()));
-                            }
-                           showSeatBooking();
-                        }
-                    });
+			JLabel lblZone = new JLabel(zone.getName());
+			lblZone.setFont(new Font("Tahoma", Font.BOLD, 15));
+			JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER)) {
+				@Override
+				public Dimension getMaximumSize() {
+					return getPreferredSize();
 				}
-				seatingChartPanel.add(seatButton);
+			};
+			panel.add(lblZone);
+			JPanel rowZone = new JPanel(); // Create a new panel for each row of seats
+			rowZone.setLayout(new BoxLayout(rowZone, BoxLayout.LINE_AXIS));
+			rowZone.add(panel);
+			seatingChartPanel.add(rowZone); // Add the row panel to the overall layout
+			for (int i = 0; i < zone.getRows(); i++) {
+				JPanel rowPanel = new JPanel(); // Create a new panel for each row of seats
+				rowPanel.setLayout(new BoxLayout(rowPanel, BoxLayout.LINE_AXIS));
+				for (int j = 0; j < zone.getColumn(); j++) {
+					Seat seat = zone.getSeats().get(i * zone.getColumn() + j);
+					JButton seatButton = new JButton();
+					seatButton.setText(seat.getSeatId());
+					if (seat.isBooked()) {
+						seatButton.setBackground(Color.RED);
+					} else {
+						seatButton.setBackground(Color.LIGHT_GRAY);
+						seatButton.addActionListener(new ActionListener() {
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								if (seatButton.getBackground().equals(Color.GREEN)) {
+									seatButton.setBackground(Color.LIGHT_GRAY);
+									removeSeat(seat.getSeatId());
+								} else {
+									seatButton.setBackground(Color.GREEN);
+									booking.add(new Booked(seat.getSeatId(), zone.getZoneId(), zone.getName(),
+											zone.getTicketPrice()));
+								}
+								showSeatBooking();
+							}
+						});
+					}
+					rowPanel.add(seatButton);
+				}
+				seatingChartPanel.add(rowPanel); // Add the row panel to the overall layout
+				seatingChartPanel.add(Box.createRigidArea(new Dimension(0, 5))); // Add some vertical space between rows
 			}
 		}
 		seatingChartPanel.revalidate();
 		seatingChartPanel.repaint();
 	}
-	
-	public void removeSeat(String seadId)
-	{
+
+	public void removeSeat(String seadId) {
 		Iterator<Booked> iterator = this.booking.iterator();
-        while (iterator.hasNext()) {
-            Booked value = iterator.next();
-            if (value.getSeatId().equals(seadId)) {
-                iterator.remove();
-            }
-        }
+		while (iterator.hasNext()) {
+			Booked value = iterator.next();
+			if (value.getSeatId().equals(seadId)) {
+				iterator.remove();
+			}
+		}
 	}
-	
+
 	public void showSeatBooking() {
 		// clear old data and insert again
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
@@ -227,15 +247,16 @@ public class DetailEventView extends JFrame {
 		for (int i = 0; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 		}
-	
+
 		double price = 0;
 		for (int i = 0; i < this.booking.size(); i++) {
-			price +=this.booking.get(i).getPrice();
-			model.addRow(
-					new Object[] { i + 1, this.booking.get(i).getSeatId(), this.booking.get(i).getZoneId(), this.booking.get(i).getNameZone(),this.booking.get(i).getPrice()});
+			price += this.booking.get(i).getPrice();
+			model.addRow(new Object[] { i + 1, this.booking.get(i).getSeatId(), this.booking.get(i).getZoneId(),
+					this.booking.get(i).getNameZone(), this.booking.get(i).getPrice() });
 		}
-		this.textTotal.setText(price+"");
+		this.textTotal.setText(price + "");
 	}
+
 	public void ShowError(String error) {
 		JOptionPane.showMessageDialog(contentPane, error, "Swing Tester", JOptionPane.ERROR_MESSAGE);
 	}
