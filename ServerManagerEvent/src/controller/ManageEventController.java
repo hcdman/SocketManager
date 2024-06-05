@@ -189,8 +189,8 @@ public class ManageEventController implements ActionListener, MouseListener {
 			Event event = new Event("E" + this.addEventView.events.size(), nameEvent, description, dateEvent,
 					new ArrayList<>(this.addEventView.schedules));
 			this.addEventView.events.add(event);
-			this.addEventView.makeEmptyEventForm();
 			this.addEventView.ShowSuccess("Add new event successfully !");
+			this.addEventView.makeEmptyEventForm();
 			this.addEventView.schedules.clear();
 			this.addEventView.zones.clear();
 			this.addEventView.updateDataSchedule();

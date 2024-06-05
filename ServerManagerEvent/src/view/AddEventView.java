@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
@@ -31,6 +32,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -45,6 +47,7 @@ import model.Schedule;
 import model.Zone;
 
 import javax.swing.JComboBox;
+import java.awt.Color;
 
 public class AddEventView extends JFrame {
 
@@ -53,7 +56,7 @@ public class AddEventView extends JFrame {
 	public JTextField nameEvent;
 	private JLabel lblNameLabel;
 	private JLabel lblDiscription;
-	public JTextField Description;
+	public JTextArea Description;
 	private JLabel lblDate;
 	public JTable table;
 	public JTable tableSeat;
@@ -75,63 +78,73 @@ public class AddEventView extends JFrame {
 		zones = new ArrayList<>();
 		events = new ArrayList<>();
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(200, 200, 1008, 773);
+		setBounds(200, 200, 1000, 800);
 		contentPane = new JPanel();
+		ImageIcon Icon = new ImageIcon("images\\event.png");
+		this.setIconImage(Icon.getImage());
+		contentPane.setBackground(new Color(167, 201, 87));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setResizable(false);
 		contentPane.setLayout(null);
 		setContentPane(contentPane);
 
-		JLabel lblEvent = new JLabel("Events");
+		JLabel lblEvent = new JLabel("Information of event");
 		lblEvent.setFont(new Font("Tahoma", Font.BOLD, 20));
-		lblEvent.setBounds(436, 25, 75, 51);
+		lblEvent.setBounds(408, 0, 243, 51);
 		contentPane.add(lblEvent);
 
 		JButton btnSaveEvent = new JButton("Save event");
-		btnSaveEvent.setBounds(824, 681, 121, 21);
+		btnSaveEvent.setBackground(new Color(56, 102, 65));
+		btnSaveEvent.setFont(new Font("Tahoma", Font.BOLD, 13));
+		btnSaveEvent.setBounds(408, 723, 120, 30);
 		contentPane.add(btnSaveEvent);
 
 		nameEvent = new JTextField();
-		nameEvent.setBounds(386, 86, 187, 30);
+		nameEvent.setBounds(436, 56, 187, 30);
 		contentPane.add(nameEvent);
 		nameEvent.setColumns(10);
 
 		lblNameLabel = new JLabel("Name event");
-		lblNameLabel.setBounds(299, 89, 67, 13);
+		lblNameLabel.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblNameLabel.setBounds(350, 63, 80, 13);
 		contentPane.add(lblNameLabel);
 
 		lblDiscription = new JLabel("Description");
-		lblDiscription.setBounds(306, 139, 60, 13);
+		lblDiscription.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblDiscription.setBounds(350, 123, 80, 13);
 		contentPane.add(lblDiscription);
 
-		Description = new JTextField();
-		Description.setColumns(10);
-		Description.setBounds(386, 125, 187, 42);
-		contentPane.add(Description);
-
+		Description = new JTextArea();
+		Description.setLineWrap(true);
+		Description.setWrapStyleWord(true);
+		JScrollPane scroll = new JScrollPane(Description);
+		contentPane.add(scroll);
+		scroll.setBounds(436, 105, 187, 50);
+		
 		lblDate = new JLabel("Date");
-		lblDate.setBounds(306, 183, 60, 13);
+		lblDate.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblDate.setBounds(387, 170, 60, 13);
 		contentPane.add(lblDate);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		dateEvent = new JDateChooser();
-		dateEvent.setBounds(386, 177, 187, 30);
+		dateEvent.setBounds(436, 162, 187, 30);
 		dateEvent.setDateFormatString(dateFormat.toPattern());
 		contentPane.add(dateEvent);
 		// Schedule
 		table = new JTable();
-		table.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		table.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		table.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		// Disable table's editing mode
 		table.setDefaultEditor(Object.class, null);
 		// set column name of table
-		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "STT", "Start time", "End time" }));
+		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "<html><b>STT<b><html>", "<html><b>Start time<b><html>", "<html><b>End time<b><html>" }));
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 		for (int i = 0; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setHeaderRenderer(centerRenderer);
 		}
 		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(25, 266, 353, 257);
+		scrollPane.setBounds(27, 257, 353, 257);
 		contentPane.add(scrollPane);
 
 		// Create a TimePickerSettings instance to customize the TimePicker.
@@ -143,64 +156,72 @@ public class AddEventView extends JFrame {
 		// Set an initial time if desired.
 		startTime.setTime(LocalTime.now());
 		// Set bounds for the TimePicker and add it to the content pane
-		startTime.setBounds(124, 545, 120, 30); // Adjusted size and position
+		startTime.setBounds(143, 536, 120, 33); // Adjusted size and position
 		contentPane.add(startTime);
 
 		JLabel lblStart = new JLabel("Start time");
-		lblStart.setBounds(54, 553, 63, 13);
+		lblStart.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblStart.setBounds(71, 536, 80, 30);
 		contentPane.add(lblStart);
 
 		endTime = new TimePicker(timeSettings);
-		endTime.setBounds(124, 591, 120, 30);
+		endTime.setBounds(143, 582, 120, 33);
 		endTime.setTime(LocalTime.now());
 		contentPane.add(endTime);
 
 		JLabel lblEndTime = new JLabel("End time");
-		lblEndTime.setBounds(54, 599, 63, 13);
+		lblEndTime.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblEndTime.setBounds(76, 581, 80, 30);
 		contentPane.add(lblEndTime);
 
 		JButton btnAddSchedule = new JButton("Add schedule");
-		btnAddSchedule.setBounds(108, 643, 101, 21);
+		btnAddSchedule.setBackground(new Color(56, 102, 65));
+		btnAddSchedule.setFont(new Font("Tahoma", Font.BOLD, 13));
+		btnAddSchedule.setBounds(143, 639, 120, 30);
 		contentPane.add(btnAddSchedule);
 
 		// Zone for seating
 		tableSeat = new JTable();
-		tableSeat.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		tableSeat.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		tableSeat.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		// Disable table's editing mode
 		tableSeat.setDefaultEditor(Object.class, null);
 		// set column name of table
 		tableSeat.setModel(new DefaultTableModel(new Object[][] {},
-				new String[] { "STT", "Name zone", "Price ticket", "Number rows", "Seats per row" }));
+				new String[] { "<html><b>STT<b><html>", "<html><b>Name zone<b><html>", "<html><b>Price ticket<b><html>", "<html><b>Number rows<b><html>", "<html><b>Seats per row<b><html>" }));
 		DefaultTableCellRenderer centerRenderer_2 = new DefaultTableCellRenderer();
 		centerRenderer_2.setHorizontalAlignment(JLabel.CENTER);
 		for (int i = 0; i < tableSeat.getColumnCount(); i++) {
 			tableSeat.getColumnModel().getColumn(i).setHeaderRenderer(centerRenderer_2);
 		}
 		JScrollPane scrollPane_2 = new JScrollPane(tableSeat);
-		scrollPane_2.setBounds(436, 266, 528, 257);
+		scrollPane_2.setBounds(436, 257, 528, 257);
 		contentPane.add(scrollPane_2);
 
 		JButton btnAddZone = new JButton("Add zone");
-		btnAddZone.setBounds(598, 692, 122, 21);
+		btnAddZone.setBackground(new Color(56, 102, 65));
+		btnAddZone.setFont(new Font("Tahoma", Font.BOLD, 13));
+		btnAddZone.setBounds(683, 680, 120, 30);
 		contentPane.add(btnAddZone);
 
 		JLabel lblZone = new JLabel("Name zone");
-		lblZone.setBounds(459, 545, 88, 20);
+		lblZone.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblZone.setBounds(565, 528, 88, 20);
 		contentPane.add(lblZone);
 
 		nameZone = new JTextField();
 		nameZone.setColumns(10);
-		nameZone.setBounds(558, 536, 187, 30);
+		nameZone.setBounds(643, 524, 187, 30);
 		contentPane.add(nameZone);
 
 		JLabel lblPrice = new JLabel("Price");
-		lblPrice.setBounds(459, 584, 88, 20);
+		lblPrice.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblPrice.setBounds(605, 568, 50, 20);
 		contentPane.add(lblPrice);
 
 		price = new JTextField();
 		price.setColumns(10);
-		price.setBounds(558, 575, 187, 30);
+		price.setBounds(643, 563, 187, 30);
 		price.addKeyListener(new KeyAdapter() {
 			public void keyTyped(KeyEvent e) {
 				char c = e.getKeyChar();
@@ -212,12 +233,13 @@ public class AddEventView extends JFrame {
 		contentPane.add(price);
 
 		JLabel lblNumberRows = new JLabel("Number rows");
-		lblNumberRows.setBounds(459, 623, 88, 20);
+		lblNumberRows.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblNumberRows.setBounds(548, 608, 88, 20);
 		contentPane.add(lblNumberRows);
 
 		rows = new JTextField();
 		rows.setColumns(10);
-		rows.setBounds(558, 614, 187, 30);
+		rows.setBounds(643, 602, 187, 30);
 		rows.addKeyListener(new KeyAdapter() {
 			public void keyTyped(KeyEvent e) {
 				char c = e.getKeyChar();
@@ -229,16 +251,19 @@ public class AddEventView extends JFrame {
 		contentPane.add(rows);
 
 		JLabel lblSeatsPerRow = new JLabel("Seats per row");
-		lblSeatsPerRow.setBounds(459, 661, 88, 20);
+		lblSeatsPerRow.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblSeatsPerRow.setBounds(544, 644, 100, 20);
 		contentPane.add(lblSeatsPerRow);
 
 		seats = new JTextField();
 		seats.setColumns(10);
-		seats.setBounds(558, 652, 187, 30);
+		seats.setBounds(643, 640, 187, 30);
 		contentPane.add(seats);
 
 		comboBox = new JComboBox<String>();
-		comboBox.setBounds(853, 235, 111, 21);
+		comboBox.setFont(new Font("Tahoma", Font.BOLD, 13));
+		comboBox.setBackground(new Color(56, 102, 65));
+		comboBox.setBounds(843, 220, 120, 30);
 		contentPane.add(comboBox);
 		// pop up menu
 		popupMenu = new JPopupMenu();
@@ -362,7 +387,7 @@ public class AddEventView extends JFrame {
 			if ((schedule.getStartTime().compareTo(this.startTime.getTime()) <= 0
 					&& schedule.getEndTime().compareTo(this.startTime.getTime()) >= 0)
 					|| (schedule.getStartTime().compareTo(this.endTime.getTime()) <= 0
-					&& schedule.getEndTime().compareTo(this.endTime.getTime()) >= 0)) {
+							&& schedule.getEndTime().compareTo(this.endTime.getTime()) >= 0)) {
 				return true;
 			}
 		}
@@ -389,21 +414,21 @@ public class AddEventView extends JFrame {
 		this.rows.setText("");
 		this.seats.setText("");
 	}
-	public void makeEmptyEventForm()
-	{
+
+	public void makeEmptyEventForm() {
 		this.nameEvent.setText("");
 		this.Description.setText("");
-		this.dateEvent.cleanup();
+		this.dateEvent.getDateEditor().setDate(null);
 	}
-	public boolean checkIsBlankFormZone()
-	{
-		if(this.nameZone.getText().isBlank()||this.price.getText().isBlank()||this.rows.getText().isBlank()||
-				this.seats.getText().isBlank())
-		{
+
+	public boolean checkIsBlankFormZone() {
+		if (this.nameZone.getText().isBlank() || this.price.getText().isBlank() || this.rows.getText().isBlank()
+				|| this.seats.getText().isBlank()) {
 			return true;
 		}
 		return false;
 	}
+
 	public void ShowError(String error) {
 		JOptionPane.showMessageDialog(contentPane, error, "Swing Tester", JOptionPane.ERROR_MESSAGE);
 	}

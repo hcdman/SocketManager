@@ -12,12 +12,14 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import javax.swing.border.EmptyBorder;
@@ -35,7 +37,7 @@ public class DetailEventView extends JFrame {
 	public JTextField nameEvent;
 	private JLabel lblNameLabel;
 	private JLabel lblDescription;
-	public JTextField Description;
+	public JTextArea Description;
 	private JLabel lblDate;
 	public JTextField dateEvent;
 	public JComboBox<String> comboBox;
@@ -45,83 +47,93 @@ public class DetailEventView extends JFrame {
 
 	public DetailEventView() {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(200, 200, 1040, 856);
+		setBounds(200, 200, 1000, 800);
 		contentPane = new JPanel();
+		contentPane.setBackground(new Color(167, 201, 87));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		ImageIcon Icon = new ImageIcon("images\\event.png");
+		this.setIconImage(Icon.getImage());
 		setResizable(false);
 		contentPane.setLayout(null);
 		setContentPane(contentPane);
 
-		JLabel lblEvent = new JLabel("Events");
+		JLabel lblEvent = new JLabel("Information of event");
 		lblEvent.setFont(new Font("Tahoma", Font.BOLD, 20));
-		lblEvent.setBounds(436, 25, 75, 51);
+		lblEvent.setBounds(398, 20, 243, 51);
 		contentPane.add(lblEvent);
 
 		nameEvent = new JTextField();
-		nameEvent.setBounds(386, 86, 187, 30);
+		nameEvent.setBounds(427, 84, 187, 30);
 		contentPane.add(nameEvent);
 		nameEvent.setColumns(10);
 		nameEvent.setEditable(false);
 		lblNameLabel = new JLabel("Name event");
-		lblNameLabel.setBounds(299, 89, 67, 13);
+		lblNameLabel.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblNameLabel.setBounds(327, 87, 80, 20);
 		contentPane.add(lblNameLabel);
 
 		lblDescription = new JLabel("Description");
-		lblDescription.setBounds(306, 139, 60, 13);
+		lblDescription.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblDescription.setBounds(334, 137, 80, 20);
 		contentPane.add(lblDescription);
-
-		Description = new JTextField();
-		Description.setColumns(10);
-		Description.setBounds(386, 125, 187, 42);
-		contentPane.add(Description);
+		
+        Description = new JTextArea();
+		Description.setLineWrap(true);
+		Description.setWrapStyleWord(true);
 		Description.setEditable(false);
+		JScrollPane scroll = new JScrollPane(Description);
+		scroll.setBounds(427, 124, 187, 42);
+		contentPane.add(scroll);
+
 		lblDate = new JLabel("Date");
-		lblDate.setBounds(306, 183, 60, 13);
+		lblDate.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblDate.setBounds(357, 179, 50, 20);
 		contentPane.add(lblDate);
 		dateEvent = new JTextField();
 		dateEvent.setColumns(10);
-		dateEvent.setBounds(386, 175, 187, 30);
+		dateEvent.setBounds(427, 176, 187, 30);
 		contentPane.add(dateEvent);
 		dateEvent.setEditable(false);
 		// display seat
 		comboBox = new JComboBox<String>();
-		comboBox.setBounds(132, 260, 111, 21);
+		comboBox.setBackground(new Color(56, 102, 65));
+		comboBox.setBounds(121, 260, 120, 30);
 		contentPane.add(comboBox);
 		// contentPane.add(seatingChartPanel);
 
 		JButton btnNewButton = new JButton("");
 		btnNewButton.setBackground(Color.RED);
-		btnNewButton.setBounds(726, 258, 67, 30);
+		btnNewButton.setBounds(726, 260, 67, 30);
 
 		JButton btnNotBook = new JButton("");
 		btnNotBook.setBackground(Color.LIGHT_GRAY);
-		btnNotBook.setBounds(883, 258, 67, 30);
+		btnNotBook.setBounds(881, 260, 67, 30);
 		contentPane.add(btnNewButton);
 		contentPane.add(btnNotBook);
 
 		JLabel lblBooked = new JLabel("BOOKED");
-		lblBooked.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblBooked.setBounds(656, 268, 60, 13);
+		lblBooked.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblBooked.setBounds(662, 264, 60, 20);
 		contentPane.add(lblBooked);
 
 		JLabel lblNotBook = new JLabel("NOT BOOK");
-		lblNotBook.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblNotBook.setBounds(814, 268, 67, 13);
+		lblNotBook.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblNotBook.setBounds(808, 264, 80, 20);
 		contentPane.add(lblNotBook);
 		
 		seatingChartPanel = new JPanel();
 		JScrollPane scrollPane = new JScrollPane(seatingChartPanel);
-		scrollPane.setBounds(50, 300, 900, 500);
+		scrollPane.setBounds(50, 300, 900, 450);
 		contentPane.add(scrollPane);
 		
-		JLabel lblSeating = new JLabel("Seating chart ");
+		JLabel lblSeating = new JLabel("Stage");
 		lblSeating.setFont(new Font("Tahoma", Font.BOLD, 20));
-		lblSeating.setBounds(383, 241, 172, 51);
+		lblSeating.setBounds(460, 260, 80, 40);
 		contentPane.add(lblSeating);
 		
 		lblSchedule = new JLabel("Schedule");
-		lblSchedule.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblSchedule.setBounds(61, 264, 75, 13);
+		lblSchedule.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblSchedule.setBounds(50, 264, 75, 20);
 		contentPane.add(lblSchedule);
 		// action
 		ActionListener action = new ManageEventController(this);

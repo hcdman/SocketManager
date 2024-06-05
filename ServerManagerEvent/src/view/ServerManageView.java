@@ -2,6 +2,7 @@ package view;
 
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,6 +40,7 @@ import model.ClientHandler;
 import model.Event;
 import model.ActionClient;
 import utils.ObjectReader;
+import java.awt.Color;
 
 public class ServerManageView extends JFrame {
 
@@ -58,61 +61,71 @@ public class ServerManageView extends JFrame {
 
 	public ServerManageView() {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(200, 200, 1008, 572);
+		setBounds(200, 200, 1000, 800);
 		contentPane = new JPanel();
+		contentPane.setBackground(new Color(167, 201, 87));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setResizable(false);
 		contentPane.setLayout(null);
 		setContentPane(contentPane);
-
-		JLabel lblEvent = new JLabel("Server");
-		lblEvent.setFont(new Font("Tahoma", Font.BOLD, 20));
-		lblEvent.setBounds(436, 25, 75, 51);
-		contentPane.add(lblEvent);
-
+		ImageIcon Icon = new ImageIcon("images\\event.png");
+		this.setIconImage(Icon.getImage());
 		nameIP = new JTextField();
-		nameIP.setBounds(386, 86, 187, 30);
+		nameIP.setBounds(462, 34, 187, 30);
 		contentPane.add(nameIP);
 		nameIP.setColumns(10);
 		nameIP.setEditable(false);
 		lblNameLabel = new JLabel("IP");
-		lblNameLabel.setBounds(309, 94, 67, 13);
+		lblNameLabel.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblNameLabel.setBounds(426, 42, 67, 13);
 		contentPane.add(lblNameLabel);
 
 		lblDiscription = new JLabel("PORT");
-		lblDiscription.setBounds(306, 139, 60, 13);
+		lblDiscription.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblDiscription.setBounds(416, 83, 60, 13);
 		contentPane.add(lblDiscription);
 
+		JLabel lblIcon = new JLabel("");
+		String path = "images\\server.png";
+		ImageIcon img = new ImageIcon(path);
+		int width = 112;
+		int height =112;
+		Image nw = img.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+		ImageIcon nc = new ImageIcon(nw);
+		lblIcon.setIcon(nc);
+		lblIcon.setBounds(266, 10, 112, 112);
+		contentPane.add(lblIcon);
+		
 		Port = new JTextField();
 		Port.setColumns(10);
-		Port.setBounds(386, 125, 187, 30);
+		Port.setBounds(462, 73, 187, 30);
 		contentPane.add(Port);
 		Port.setEditable(false);
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		// Schedule
 		table = new JTable();
-		table.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		table.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		table.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		// Disable table's editing mode
 		table.setDefaultEditor(Object.class, null);
 		// set column name of table
-		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "IP", "Port", "Status" }));
+		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "<html><b>IP<b><html>", "<html><b>Port<b><html>", "<html><b>Status<b><html>" }));
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 		for (int i = 0; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setHeaderRenderer(centerRenderer);
 		}
 		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(37, 208, 353, 257);
+		scrollPane.setBounds(37, 227, 341, 526);
 		contentPane.add(scrollPane);
 
 		tableClient = new JTable();
-		tableClient.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		tableClient.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		tableClient.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		// Disable table's editing mode
 		tableClient.setDefaultEditor(Object.class, null);
 		// set column name of table
-		tableClient.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "IP", "Port", "Time", "Action" }));
+		tableClient.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "<html><b>IP<b><html>", "<html><b>Port<b><html>", "<html><b>Time<b><html>", "<html><b>Action<b><html>" }));
 		DefaultTableCellRenderer centerRenderer_2 = new DefaultTableCellRenderer();
 		centerRenderer_2.setHorizontalAlignment(JLabel.CENTER);
 		
@@ -126,17 +139,17 @@ public class ServerManageView extends JFrame {
 		columnModel.getColumn(3).setPreferredWidth(200); // Width for "Action" column
 		JScrollPane scrollPane_2 = new JScrollPane(tableClient);
 		//tableClient.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		scrollPane_2.setBounds(436, 208, 528, 257);
+		scrollPane_2.setBounds(416, 227, 560, 526);
 		contentPane.add(scrollPane_2);
 
 		JLabel lblListClients = new JLabel("List clients");
 		lblListClients.setFont(new Font("Tahoma", Font.BOLD, 20));
-		lblListClients.setBounds(37, 160, 121, 40);
+		lblListClients.setBounds(37, 177, 121, 40);
 		contentPane.add(lblListClients);
 
 		JLabel lblFollow = new JLabel("Follow");
 		lblFollow.setFont(new Font("Tahoma", Font.BOLD, 20));
-		lblFollow.setBounds(436, 165, 75, 40);
+		lblFollow.setBounds(416, 177, 75, 40);
 		contentPane.add(lblFollow);
 		// action
 		ActionListener action = new ManageEventController(this);
