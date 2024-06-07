@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.List;
 
 import javax.swing.JComboBox;
@@ -31,16 +32,18 @@ public class ClientController implements ActionListener, MouseListener {
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 
-	public ClientController(HomeView view, ObjectInputStream in, ObjectOutputStream out) {
+	public ClientController(HomeView view, ObjectInputStream in, ObjectOutputStream out,Socket client) {
 		this.home = view;
 		this.in = in;
 		this.out = out;
+		this.client = client;
 	}
 
-	public ClientController(DetailEventView view, ObjectInputStream in, ObjectOutputStream out) {
+	public ClientController(DetailEventView view, ObjectInputStream in, ObjectOutputStream out,Socket client) {
 		this.detail = view;
 		this.in = in;
 		this.out = out;
+		this.client=client;
 	}
 
 	public void startClientSocket(String host, int port) throws IOException {
@@ -50,8 +53,7 @@ public class ClientController implements ActionListener, MouseListener {
 			this.out = new ObjectOutputStream(client.getOutputStream());
 			this.in = new ObjectInputStream(client.getInputStream());
 		} catch (IOException ex) {
-			System.out.println(ex);
-			System.out.println("Failed connect");
+			this.connect.ShowError("Failed to connect to server !");
 		}
 	}
 
@@ -65,47 +67,84 @@ public class ClientController implements ActionListener, MouseListener {
 		String command = e.getActionCommand();
 		if (command.equals("Connect")) {
 			// get port and address to connect
-			String IP = this.connect.IPSERVER.getText();
-			int port = Integer.parseInt(this.connect.PORT.getText());
+			String IP = this.connect.IpServer.getText();
+			int port = Integer.parseInt(this.connect.Port.getText());
 			try {
 				this.startClientSocket(IP, port);
 				String message = MessageClient.GET_DATA;
 				out.writeObject(message);
 				out.flush();
-				this.home = new HomeView(this.in, this.out);
+				this.home = new HomeView(this.in, this.out,this.client);
 				this.home.events = (List<Event>) in.readObject();
 				this.connect.dispose();
 				this.home.setLocationRelativeTo(null);
 				this.home.setVisible(true);
 				this.home.showEvents();
-			} catch (IOException | ClassNotFoundException e1) {
+			} catch (IOException | ClassNotFoundException|NullPointerException e1) {
 				e1.printStackTrace();
 			}
-			// error
 		}
 		if (command.equals("Confirm")) {
-			// get port and address to connect
 			try {
+				if(this.detail.booking.size()==0)
+				{
+					this.detail.ShowError("Please select at least one seat to proceed!");
+					return;
+				}
+				if(this.detail.booking.size()>4)
+				{
+					this.detail.ShowError("For each booking, a maximum of 4 seats can be selected!");
+					return;
+				}
+				if(this.detail.phoneNumber.getText().isBlank())
+				{
+					this.detail.ShowError("You have to fill your phone number before confirm!");
+					return;
+				}
+				if(this.detail.phoneNumber.getText().length()!=10)
+				{
+					this.detail.ShowError("Your phone number must have 10 numbers!");
+					return;
+				}
 				int indexSchedule = this.detail.comboBox.getSelectedIndex();
-				String msg = MessageClient.BOOK + " "+ this.detail.booking.size()+" " + this.detail.event.getEventId() + " " + indexSchedule;
+				String phoneNumber = this.detail.phoneNumber.getText();
+				String userName = this.detail.name.getText();
+				String msg = MessageClient.BOOK + "-" +phoneNumber+"-"+userName+"-"+ this.detail.booking.size()+"-" + this.detail.event.getEventId() + "-" + indexSchedule;
 
 				for (Booked value : this.detail.booking) {
-					msg += " " + value.getZoneId() + " " + value.getSeatId();
+					msg += "-" + value.getZoneId() + "-" + value.getSeatId();
 				}
-				this.detail.booking.clear();
-				this.detail.showSeatBooking();
-				this.out.writeObject(msg);
-				this.out.flush();
-
-				// Receive data from server
+				try {
+					this.out.writeObject(msg);
+					this.out.flush();
+				} catch (SocketException e1) {
+					this.detail.ShowError("Connection to server was lost while sending data!");
+					this.detail.dispose();
+					return;
+				}
 				try {
 					Schedule schedule = (Schedule) this.in.readObject();
 					this.detail.displaySeatingChart(schedule);
+					this.detail.ShowSuccess("Booking successful!");
+					this.detail.booking.clear();
+					this.detail.showSeatBooking();
+					this.detail.phoneNumber.setText("");
+					this.detail.name.setText("");
+					
 				} catch (Exception e0) {
+					msg = MessageClient.SCHEDULE + "-" +this.detail.event.getEventId()+"-"+ indexSchedule;
+					
+					try {
+						this.out.writeObject(msg);
+						this.out.flush();
+					} catch (SocketException e1) {
+						this.detail.ShowError("Connection to server was lost while sending data!");
+						this.detail.dispose();
+						return;
+					}
 					this.detail.ShowError("Some seat have been booked!");
-					msg = MessageClient.SCHEDULE + " " +this.detail.event.getEventId()+" "+ indexSchedule;
-					this.out.writeObject(msg);
-					this.out.flush();
+					this.detail.booking.clear();
+					this.detail.showSeatBooking();
 					Schedule schedule;
 					try {
 						schedule = (Schedule) this.in.readObject();
@@ -113,15 +152,12 @@ public class ClientController implements ActionListener, MouseListener {
 					} catch (ClassNotFoundException e1) {
 						e1.printStackTrace();
 					}
-
 				}
 
 			} catch (IOException e1) {
 
 				e1.printStackTrace();
 			}
-
-			// error
 		}
 
 		int index = -1;
@@ -131,14 +167,14 @@ public class ClientController implements ActionListener, MouseListener {
 		}
 		if (index != -1) {
 			try {
-				String msg = MessageClient.SCHEDULE + " "+this.detail.event.getEventId()+" " + index;
+				String msg = MessageClient.SCHEDULE + "-"+this.detail.event.getEventId()+"-" + index;
 				this.out.writeObject(msg);
 				this.out.flush();
 				Schedule schedule = (Schedule) this.in.readObject();
 				this.detail.displaySeatingChart(schedule);
-			} catch (IOException | ClassNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} catch (Exception e1) {
+				this.detail.ShowError("Lost connecttion with server!");
+				this.detail.dispose();
 			}
 
 		}
@@ -146,18 +182,22 @@ public class ClientController implements ActionListener, MouseListener {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// Check if a row is clicked
 		if (e.getClickCount() == 1) {
-			// Get the selected row
 			int selectedRow = this.home.table.getSelectedRow();
 			if (selectedRow != -1) {
-				// Retrieve data from the selected row
-				String message = MessageClient.GET_EVENT + " " + selectedRow;
+				String message = MessageClient.GET_EVENT + "-" + selectedRow;
 				try {
-					this.out.writeObject(message);
-					this.out.flush();
-
-					this.detail = new DetailEventView(this.in, this.out);
+					
+					try {
+						this.out.writeObject(message);
+						this.out.flush();
+					} catch (SocketException e1) {
+						this.home.ShowError("Lost connection with server!");
+						this.home.dispose();
+						return;
+					}
+					
+					this.detail = new DetailEventView(this.in, this.out,this.client);
 					this.detail.event = (Event) in.readObject();
 					this.home.setEnabled(false);
 					this.detail.setLocationRelativeTo(null);
