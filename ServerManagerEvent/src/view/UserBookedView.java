@@ -1,15 +1,12 @@
 package view;
 
-import java.awt.EventQueue;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseListener;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -19,8 +16,9 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+
 import model.UserBooked;
-import java.awt.Color;
 
 public class UserBookedView extends JFrame {
 
@@ -44,7 +42,9 @@ public class UserBookedView extends JFrame {
 		setContentPane(contentPane);
 		ImageIcon Icon = new ImageIcon("images\\event.png");
 		this.setIconImage(Icon.getImage());
-		JLabel lblEvent = new JLabel("Data of booking ticket");
+		
+		//Label
+		JLabel lblEvent = new JLabel("Ticket booking records");
 		lblEvent.setFont(new Font("Tahoma", Font.BOLD, 20));
 		lblEvent.setBounds(310, 39, 250, 51);
 		contentPane.add(lblEvent);
@@ -60,22 +60,27 @@ public class UserBookedView extends JFrame {
 		lblIcon.setBounds(558, 14, 100, 100);
 		contentPane.add(lblIcon);
 		
+		//Data table
 		table = new JTable();
 		table.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		table.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		// Disable table's editing mode
 		table.setDefaultEditor(Object.class, null);
-		// set column name of table
-		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "<html><b>STT<b><html>", "<html><b>Phone number<b><html>", "<html><b>Event<b><html>","<html><b>Schedule<b><html>","<html><b>Zone<b><html>","<html><b>Seats<b><html>","<html><b>Time<b><html>"}));
+		table.setRowHeight(20);
+		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] {  "<html><b>STT<b><html>","<html><b>Name<b><html>", "<html><b>Phone number<b><html>", "<html><b>Event<b><html>","<html><b>Schedule<b><html>","<html><b>Zone<b><html>","<html><b>Seats<b><html>","<html><b>Time<b><html>"}));
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 		for (int i = 0; i < table.getColumnCount(); i++) {
 			table.getColumnModel().getColumn(i).setHeaderRenderer(centerRenderer);
 		}
+		TableColumnModel columnModel = table.getColumnModel();
+		columnModel.getColumn(0).setPreferredWidth(20);
+		columnModel.getColumn(3).setPreferredWidth(20);
+		columnModel.getColumn(5).setPreferredWidth(20);
 		JScrollPane scrollPane = new JScrollPane(table);
 		scrollPane.setBounds(10, 124, 966, 576);
 		contentPane.add(scrollPane);
 	}
+	
 	public void showUsers() {
 		DefaultTableModel model = (DefaultTableModel) table.getModel();
 		int rowCount = model.getRowCount();
@@ -90,7 +95,7 @@ public class UserBookedView extends JFrame {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 		for (int i = 0; i < this.users.size(); i++) {
 			model.addRow(
-					new Object[] { i + 1, this.users.get(i).getPhoneNumber(), this.users.get(i).getIdEvent(),this.users.get(i).getIdSchedule(),this.users.get(i).getIdZone(),this.users.get(i).getIdSeats(), this.users.get(i).getTime().format(formatter) });
+					new Object[] {i+1, this.users.get(i).getUserName(), this.users.get(i).getPhoneNumber(), this.users.get(i).getIdEvent(),this.users.get(i).getSchedule(),this.users.get(i).getZone(),this.users.get(i).getIdSeats(), this.users.get(i).getTime().format(formatter) });
 		}
 	}
 

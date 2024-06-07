@@ -5,7 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,7 +20,12 @@ public class ClientHandler implements Runnable {
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 	private ServerManageView view;
-
+	private String PATH_EVENT_FILE = "src/data/events.json";
+	private String PATH_DATA_BOOKED_FILE ="src/data/databooked.json";
+	private String GET_DATA = "All";
+	private String GET_EVENT = "GetEvent";
+	private String BOOK = "Book";
+	private String SCHEDULE = "GetSchedule";
 	public ClientHandler(Socket clientSocket, ServerManageView view) throws IOException {
 		this.client = clientSocket;
 		this.view = view;
@@ -53,25 +57,22 @@ public class ClientHandler implements Runnable {
 	@Override
 	public void run() {
 		String clientMsg = "";
-		String sendMsg = "";
 		try {
 			while (true) {
-				// Read the incoming data from client
 				clientMsg = (String) in.readObject();
-				String[] pattern = clientMsg.split(" ");
-				System.out.println(pattern[0]);
-				if (clientMsg.equals("All")) {
-					out.writeObject(ObjectReader.readObjectsFromFile("src/data/events.json",Event.class));
+				String[] pattern = clientMsg.split("-");
+				if (clientMsg.equals(GET_DATA)) {
+					out.writeObject(ObjectReader.readObjectsFromFile(PATH_EVENT_FILE,Event.class));
 					out.flush();
 				}
-				if (pattern[0].equals("GetEvent")) {
+				if (pattern[0].equals(GET_EVENT)) {
 					int index = Integer.parseInt(pattern[1]);
-					Event event = ObjectReader.readObjectsFromFile("src/data/events.json",Event.class).get(index);
+					Event event = ObjectReader.readObjectsFromFile(PATH_EVENT_FILE,Event.class).get(index);
 					out.writeObject(event);
 					out.flush();
 				}
-				if (pattern[0].equals("GetSchedule")) {
-					List<Event> events = ObjectReader.readObjectsFromFile("src/data/events.json",Event.class);
+				if (pattern[0].equals(SCHEDULE)) {
+					List<Event> events = ObjectReader.readObjectsFromFile(PATH_EVENT_FILE,Event.class);
 					Event event = new Event();
 					String idEvent = pattern[1];
 					int indexSchedule = Integer.parseInt(pattern[2]);
@@ -84,16 +85,16 @@ public class ClientHandler implements Runnable {
 					out.writeObject(event.getSchedules().get(indexSchedule));
 					out.flush();
 				}
-				if (pattern[0].equals("Book")) {
-					List<Event> events = ObjectReader.readObjectsFromFile("src/data/events.json",Event.class);
-					List<UserBooked> users = ObjectReader.readObjectsFromFile("src/data/databooked.json",UserBooked.class);
-					//use map to get zone and id all seats in zone
+				if (pattern[0].equals(BOOK)) {
+					List<Event> events = ObjectReader.readObjectsFromFile(PATH_EVENT_FILE,Event.class);
+					List<UserBooked> users = ObjectReader.readObjectsFromFile(PATH_DATA_BOOKED_FILE,UserBooked.class);
 					Map<String,String> dataSeats = new LinkedHashMap<String, String>();
 					String phoneNumber = pattern[1];
-					String tickets = pattern[2];
-					String idEvent = pattern[3];
+					String userName = pattern[2];
+					String tickets = pattern[3];
+					String idEvent = pattern[4];
 					String idSeats = "";
-					int indexSchedule = Integer.parseInt(pattern[4]);
+					int indexSchedule = Integer.parseInt(pattern[5]);
 					List<Zone> zones = new ArrayList<>();
 					Schedule schedule = new Schedule();
 					for (Event event : events) {
@@ -102,13 +103,11 @@ public class ClientHandler implements Runnable {
 						}
 					}
 					boolean flag = false;
-					for (int i = 5; i < pattern.length; i = i + 2) {
+					for (int i = 6; i < pattern.length; i = i + 2) {
 						String idZone = pattern[i];
 						String idSeat = pattern[i + 1];
 						dataSeats.put(idZone,dataSeats.getOrDefault(idZone, "")+" "+idSeat);
 						idSeats +=idSeat+" ";
-						System.out.println("seat: " + idSeat + "- zone: " + idZone);
-						//Can't book one seat
 						if (!setBooking(zones, idZone, idSeat)) {
 							flag = true;
 							break;
@@ -126,19 +125,17 @@ public class ClientHandler implements Runnable {
 						}
 						for(Map.Entry<String, String> value : dataSeats.entrySet())
 						{
-							users.add(new UserBooked(phoneNumber, idEvent,schedule.getScheduleId(),value.getKey(),value.getValue(),LocalDateTime.now()));
+							users.add(new UserBooked(phoneNumber,userName, idEvent,schedule.getStartTime()+" to "+schedule.getEndTime(),value.getKey(),value.getValue(),LocalDateTime.now()));
 						}
-						//write data use to file
 						this.view.events = events;
 						this.view.histories.add(new ActionClient(this.getClient().getInetAddress().toString(),this.getClient().getPort()+"",LocalDateTime.now(), "Book "+tickets+" tickets for event have id " + idEvent));
 						this.view.UpdateHistory();
-						ObjectWriter.writeObjectsToFile(events, "src/data/events.json");
-						ObjectWriter.writeObjectsToFile(users, "src/data/databooked.json");
+						ObjectWriter.writeObjectsToFile(events, PATH_EVENT_FILE);
+						ObjectWriter.writeObjectsToFile(users, PATH_DATA_BOOKED_FILE);
 						out.writeObject(schedule);
 						out.flush();
 						
 					}
-					
 				}
 
 			}

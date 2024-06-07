@@ -2,12 +2,14 @@ package model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
 public class UserBooked implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String phoneNumber;
+	private String userName;
 	private String idEvent;
-	private String idSchedule;
-	private String idZone;
+	private String schedule;
+	private String zone;
 	private String idSeats;
 	private LocalDateTime time;
 	public UserBooked()
@@ -15,23 +17,16 @@ public class UserBooked implements Serializable {
 		
 	}
 	
-	public UserBooked(String phoneNumber, String idEvent, String idSchedule, String idZone, String idSeats,
+	public UserBooked(String phoneNumber, String userName, String idEvent, String schedule, String zone, String idSeats,
 			LocalDateTime time) {
 		super();
 		this.phoneNumber = phoneNumber;
+		this.userName = userName;
 		this.idEvent = idEvent;
-		this.idSchedule = idSchedule;
-		this.idZone = idZone;
+		this.schedule = schedule;
+		this.zone = zone;
 		this.idSeats = idSeats;
 		this.time = time;
-	}
-
-	public String getIdZone() {
-		return idZone;
-	}
-
-	public void setIdZone(String idZone) {
-		this.idZone = idZone;
 	}
 
 	public String getPhoneNumber() {
@@ -40,17 +35,29 @@ public class UserBooked implements Serializable {
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 	public String getIdEvent() {
 		return idEvent;
 	}
 	public void setIdEvent(String idEvent) {
 		this.idEvent = idEvent;
 	}
-	public String getIdSchedule() {
-		return idSchedule;
+	public String getSchedule() {
+		return schedule;
 	}
-	public void setIdSchedule(String idSchedule) {
-		this.idSchedule = idSchedule;
+	public void setSchedule(String schedule) {
+		this.schedule = schedule;
+	}
+	public String getZone() {
+		return zone;
+	}
+	public void setZone(String zone) {
+		this.zone = zone;
 	}
 	public String getIdSeats() {
 		return idSeats;
@@ -64,6 +71,5 @@ public class UserBooked implements Serializable {
 	public void setTime(LocalDateTime time) {
 		this.time = time;
 	}
-	
-	
+
 }

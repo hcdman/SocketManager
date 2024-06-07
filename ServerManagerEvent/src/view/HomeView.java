@@ -8,15 +8,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 
 import controller.ManageEventController;
 import model.Event;
-import model.Schedule;
 import utils.ObjectReader;
 
 import javax.swing.JLabel;
@@ -28,7 +26,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.Color;
@@ -39,6 +36,7 @@ public class HomeView extends JFrame {
 	private JPanel contentPane;
 	public JTable table;
 	public List<Event> events;
+	private static String PATH_EVENT_FILE = "src/data/events.json";
 
 	/**
 	 * Launch the application.
@@ -47,7 +45,6 @@ public class HomeView extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					// Make interface more beautiful
 					try {
 						UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
 					} catch (Exception e) {
@@ -57,7 +54,7 @@ public class HomeView extends JFrame {
 					frame.setLocationRelativeTo(null);
 					frame.setVisible(true);
 					//read and show data
-					frame.events= ObjectReader.readObjectsFromFile("src/data/events.json",Event.class);
+					frame.events= ObjectReader.readObjectsFromFile(PATH_EVENT_FILE,Event.class);
 					frame.showEvents();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -74,6 +71,7 @@ public class HomeView extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ImageIcon Icon = new ImageIcon("images\\event.png");
 		this.setIconImage(Icon.getImage());
+		
 		contentPane = new JPanel();
 		contentPane.setBackground(new Color(167, 201, 87));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -82,28 +80,13 @@ public class HomeView extends JFrame {
 		contentPane.setLayout(null);
 		setContentPane(contentPane);
 
+		//Button
 		JButton btnAddNewEvent = new JButton("Add new event");
 		btnAddNewEvent.setBackground(new Color(56, 102, 65));
 		btnAddNewEvent.setForeground(new Color(0, 0, 0));
 		btnAddNewEvent.setFont(new Font("Tahoma", Font.BOLD, 13));
 		btnAddNewEvent.setBounds(773, 125, 150, 30);
 		contentPane.add(btnAddNewEvent);
-		
-		table = new JTable();
-		table.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		table.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
-		// Disable table's editing mode
-		table.setDefaultEditor(Object.class, null);
-		// set column name of table
-		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "<html><b>STT</b></html>", "<html><b>Name event</b></html>", "<html><b>Description</b></html>","<html><b>Date</b></html>" }));
-		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-		for (int i = 0; i < table.getColumnCount(); i++) {
-			table.getColumnModel().getColumn(i).setHeaderRenderer(centerRenderer);
-		}
-		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(104, 170, 819, 564);
-		contentPane.add(scrollPane);
 		
 		JButton btnOpenServer = new JButton("Open server");
 		btnOpenServer.setForeground(new Color(0, 0, 0));
@@ -112,6 +95,14 @@ public class HomeView extends JFrame {
 		btnOpenServer.setBounds(104, 125, 121, 30);
 		contentPane.add(btnOpenServer);
 		
+		JButton btnSeatBooked = new JButton("Seat booked");
+		btnSeatBooked.setBackground(new Color(56, 102, 65));
+		btnSeatBooked.setForeground(new Color(0, 0, 0));
+		btnSeatBooked.setFont(new Font("Tahoma", Font.BOLD, 13));
+		btnSeatBooked.setBounds(463, 125, 121, 30);
+		contentPane.add(btnSeatBooked);
+		
+		//Label
 		JLabel lblIcon = new JLabel("");
 		String path = "images\\home.png";
 		ImageIcon img = new ImageIcon(path);
@@ -123,12 +114,25 @@ public class HomeView extends JFrame {
 		lblIcon.setBounds(465, 5, 112, 112);
 		contentPane.add(lblIcon);
 		
-		JButton btnSeatBooked = new JButton("Seat booked");
-		btnSeatBooked.setBackground(new Color(56, 102, 65));
-		btnSeatBooked.setForeground(new Color(0, 0, 0));
-		btnSeatBooked.setFont(new Font("Tahoma", Font.BOLD, 13));
-		btnSeatBooked.setBounds(463, 125, 121, 30);
-		contentPane.add(btnSeatBooked);
+		//Data table
+		table = new JTable();
+		table.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		table.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		table.setRowHeight(20);
+		table.setDefaultEditor(Object.class, null);
+		table.setModel(new DefaultTableModel(new Object[][] {}, new String[] { "<html><b>STT</b></html>", "<html><b>ID</b></html>","<html><b>Name event</b></html>", "<html><b>Description</b></html>","<html><b>Date</b></html>" }));
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+		for (int i = 0; i < table.getColumnCount(); i++) {
+			table.getColumnModel().getColumn(i).setHeaderRenderer(centerRenderer);
+		}
+		TableColumnModel columnModel = table.getColumnModel();
+		columnModel.getColumn(0).setPreferredWidth(10);
+		columnModel.getColumn(1).setPreferredWidth(10);
+		JScrollPane scrollPane = new JScrollPane(table);
+		scrollPane.setBounds(104, 170, 819, 564);
+		contentPane.add(scrollPane);	
+		
 		// Actions
 		ActionListener action = new ManageEventController(this);
 		table.addMouseListener((MouseListener) action);
@@ -151,7 +155,7 @@ public class HomeView extends JFrame {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 		for (int i = 0; i < this.events.size(); i++) {
 			model.addRow(
-					new Object[] { i + 1, this.events.get(i).getName(), this.events.get(i).getDescription(), this.events.get(i).getDate().format(formatter) });
+					new Object[] { i + 1,this.events.get(i).getEventId(), this.events.get(i).getName(), this.events.get(i).getDescription(), this.events.get(i).getDate().format(formatter) });
 		}
 	}
 }
